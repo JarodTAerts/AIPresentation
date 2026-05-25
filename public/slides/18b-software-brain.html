@@ -1,0 +1,120 @@
+<section class="sb-slide">
+  <h2>Underneath, most companies are <span class="accent rose">software companies</span>.</h2>
+
+  <div class="two-col mt-1" style="gap: 1.8em;">
+    <div>
+      <h3 class="c-rose sb-subhead">What these businesses actually <em>are</em>:</h3>
+      <ul class="sb-list">
+        <li><strong>Banks</strong> — a database with a UI. The vault is a row in a table.</li>
+        <li><strong>Insurance</strong> — actuarial models + claims-workflow software.</li>
+        <li><strong>Airlines, logistics, retail</strong> — pricing, routing, inventory engines.</li>
+        <li><strong>HR, legal, accounting, marketing</strong> — workflows on SaaS that <em>is</em> software.</li>
+        <li><strong>Hospitals, schools, governments</strong> — the EMR, the LMS, the case-management system.</li>
+      </ul>
+    </div>
+
+    <div class="sb-chain">
+      <div class="sb-step sb-step-1">
+        <div class="sb-step-num">1</div>
+        <div class="sb-step-body">
+          <strong>AI gets good at writing software.</strong>
+          <span class="muted">That's what we just showed — and it's already happening.</span>
+        </div>
+      </div>
+      <div class="sb-arrow">↓</div>
+      <div class="sb-step sb-step-2">
+        <div class="sb-step-num">2</div>
+        <div class="sb-step-body">
+          <strong>It builds the specific tools to automate any knowledge-work task.</strong>
+          <span class="muted">Not one giant model — millions of small custom programs, on demand.</span>
+        </div>
+      </div>
+      <div class="sb-arrow">↓</div>
+      <div class="sb-step sb-step-3">
+        <div class="sb-step-num">3</div>
+        <div class="sb-step-body">
+          <strong>Most knowledge work that runs on software becomes automatable.</strong>
+          <span class="muted">Underwriting, claims, scheduling, reporting, compliance, drafting…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="callout rose sb-quote">
+    <span class="sb-quote-attr">Nilay Patel (The Verge) — the "software brain" view</span>
+    If the bottleneck on automating a job has always been <em>"someone needs to write the software,"</em> and AI removes that bottleneck — <strong>the software shows up on demand.</strong>
+  </p>
+
+  <style>
+    .sb-slide h2 { font-size: 1.55em; line-height: 1.2; margin-bottom: 0.3em; }
+    .sb-subhead { font-size: 1em; margin: 0 0 0.5em; }
+    .sb-list { list-style: none; padding: 0; margin: 0; }
+    .sb-list li {
+      background: var(--bg-1);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--phosphor);
+      border-radius: 8px;
+      padding: 0.55em 0.85em;
+      margin-bottom: 0.5em;
+      font-size: 0.92em;
+      line-height: 1.4;
+    }
+    .sb-chain { display: flex; flex-direction: column; gap: 0.35em; }
+    .sb-step {
+      display: flex;
+      align-items: center;
+      gap: 0.9em;
+      background: var(--bg-1);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--rose);
+      border-radius: 10px;
+      padding: 0.7em 1em;
+    }
+    .sb-step-1 { border-left-color: var(--phosphor); }
+    .sb-step-2 { border-left-color: var(--cyan); }
+    .sb-step-3 { border-left-color: var(--rose); }
+    .sb-step-num {
+      flex: 0 0 auto;
+      width: 2em;
+      height: 2em;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1em;
+      background: var(--bg-2);
+    }
+    .sb-step-1 .sb-step-num { color: var(--phosphor); border: 1.5px solid var(--phosphor); }
+    .sb-step-2 .sb-step-num { color: var(--cyan);    border: 1.5px solid var(--cyan); }
+    .sb-step-3 .sb-step-num { color: var(--rose);    border: 1.5px solid var(--rose); }
+    .sb-step-body { display: flex; flex-direction: column; gap: 0.2em; line-height: 1.35; font-size: 0.95em; }
+    .sb-step-body strong { color: var(--ink); }
+    .sb-step-body .muted { font-size: 0.78em; color: var(--muted); }
+    .sb-arrow {
+      align-self: center;
+      font-family: var(--mono);
+      color: var(--ink-soft);
+      font-size: 1.2em;
+      line-height: 1;
+      opacity: 0.55;
+      margin: -0.15em 0;
+    }
+    .sb-quote {
+      margin-top: 0.8em !important;
+      font-size: 0.82em;
+      line-height: 1.45;
+      padding: 0.7em 1em !important;
+    }
+    .sb-quote-attr {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.78em;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--rose);
+      margin-bottom: 0.25em;
+    }
+  </style>
+</section>

@@ -26,6 +26,7 @@ window.SLIDE_MANIFEST = [
   'slides/16-section-impact.html',
   'slides/17-hollowing-out.html',
   'slides/18-case-studies.html',
+  'slides/18b-software-brain.html',
   'slides/19-energy.html',
   'slides/20-wealth.html',
   'slides/21-hardware.html',
