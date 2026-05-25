@@ -1,0 +1,1076 @@
+/* ==========================================================================
+   Widget-specific styles (Mood Mixer, Toy Transformer, scratch-out,
+   zoom-out canvas, architecture diagram, agent loop, MCP hub, etc.)
+   ========================================================================== */
+
+/* ---------- Slide 4: Linear Algebra Review → 101 scratch-out ---------- */
+.linalg-review {
+  text-align: center;
+  margin: auto 0;
+}
+.linalg-review .lr-title {
+  font-size: 2.6em;
+  font-weight: 700;
+  color: var(--ink);
+  position: relative;
+  display: inline-block;
+  letter-spacing: -0.02em;
+}
+.linalg-review .lr-word { display: inline-block; }
+.linalg-review .lr-review {
+  position: relative;
+  color: var(--ink-soft);
+  display: inline-block;
+  margin: 0 0.25em;
+}
+.linalg-review .lr-strike {
+  position: absolute;
+  inset: 38% -10% auto -10%;
+  width: 120%;
+  height: 36px;
+  pointer-events: none;
+  overflow: visible;
+}
+.linalg-review .lr-strike path {
+  fill: none;
+  stroke: #ff3b3b;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  filter: drop-shadow(0 0 8px rgba(255,59,59,0.55));
+}
+.linalg-review.animate-in .lr-strike path {
+  animation: lrScribble 0.7s 0.0s ease-out forwards;
+}
+@keyframes lrScribble {
+  to { stroke-dashoffset: 0; }
+}
+.linalg-review .lr-101 {
+  display: inline-block;
+  position: relative;
+  color: #ff3b3b;
+  font-family: 'Caveat', 'Bradley Hand', 'Permanent Marker', cursive;
+  font-weight: 700;
+  font-size: 1.35em;
+  opacity: 0;
+  transform: translateY(-12px) rotate(-8deg) scale(0.7);
+  transform-origin: center;
+  margin-left: 0.35em;
+  text-shadow: 0 0 12px rgba(255,59,59,0.45);
+}
+.linalg-review.animate-in .lr-101 {
+  animation: lrPop 0.45s 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes lrPop {
+  0%   { opacity: 0; transform: translateY(-18px) rotate(-14deg) scale(0.5); }
+  60%  { opacity: 1; transform: translateY(-2px) rotate(0deg) scale(1.15); }
+  100% { opacity: 1; transform: translateY(-6px) rotate(-6deg) scale(1.05); }
+}
+.linalg-review .lr-sub {
+  margin-top: 1.4em;
+  font-size: 0.95em;
+  color: var(--ink-soft);
+  opacity: 0;
+  transition: opacity 0.4s 1.1s ease;
+}
+.linalg-review .lr-sub { display: none; }
+.linalg-review .lr-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8em;
+  margin: 1.6em auto 0;
+  max-width: 60em;
+  text-align: left;
+  align-items: stretch;
+}
+.linalg-review .lr-blurb {
+  padding: 1.1em 1.3em;
+  background: rgba(122,217,229,0.05);
+  border: 1px solid rgba(122,217,229,0.18);
+  border-left: 3px solid var(--cyan);
+  border-radius: 8px;
+  font-size: 0.82em;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.linalg-review .lr-blurb .lr-blurb-title {
+  margin: 0 0 0.55em;
+  font-size: 1.1em;
+  color: var(--cyan);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.linalg-review .lr-blurb p { margin: 0 0 0.7em; }
+.linalg-review .lr-blurb p:last-child { margin-bottom: 0; }
+.linalg-review .lr-blurb strong { color: var(--ink); }
+.linalg-review .lr-blurb em { color: var(--cyan); font-style: normal; }
+.linalg-review.animate-in .lr-blurb {
+  transition-delay: 1.2s;
+  opacity: 1;
+  transform: none;
+}
+.linalg-review .lr-hint {
+  margin-top: 1.8em;
+  font-family: var(--mono);
+  font-size: 0.55em;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+.linalg-review.animate-in .lr-hint { opacity: 0; pointer-events: none; }
+.linalg-review .lr-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+.reveal .lr-bullets { margin: 0; }
+.linalg-review .lr-bullets li {
+  display: flex; gap: 0.7em; align-items: baseline;
+  padding: 0.75em 1em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--phosphor);
+  border-radius: 8px;
+  margin-bottom: 0;
+  font-size: 0.85em;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.linalg-review .lr-bullets .pill {
+  font-family: var(--mono);
+  color: var(--phosphor);
+  font-size: 0.75em;
+  background: rgba(91,233,185,0.1);
+  padding: 0.1em 0.45em;
+  border-radius: 4px;
+}
+.linalg-review.animate-in .lr-sub { opacity: 1; }
+.linalg-review.animate-in .lr-bullets li:nth-child(1) { transition-delay: 1.7s; opacity: 1; transform: none; }
+.linalg-review.animate-in .lr-bullets li:nth-child(2) { transition-delay: 2.0s; opacity: 1; transform: none; }
+.linalg-review.animate-in .lr-bullets li:nth-child(3) { transition-delay: 2.3s; opacity: 1; transform: none; }
+
+/* ---------- Slide 5: Mood Mixer ---------- */
+#mood-mixer .mm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 1.2em;
+  align-items: start;
+}
+#mood-mixer h4 {
+  font-family: var(--mono);
+  text-transform: uppercase;
+  font-size: 0.55em;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-bottom: 0.7em;
+}
+#mood-mixer .mm-col {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em 1.2em;
+}
+.mm-field { margin-bottom: 0.9em; }
+.mm-field label { display: flex; justify-content: space-between; align-items: baseline; }
+.mm-field label .val { color: var(--phosphor); font-family: var(--mono); font-size: 0.95em; }
+
+.mm-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+  font-family: var(--mono);
+}
+.mm-matrix th {
+  font-size: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+  padding: 0.3em 0.2em;
+}
+.mm-matrix tbody th { text-align: right; padding-right: 0.5em; color: var(--ink-soft); }
+.mm-matrix input[type="number"] {
+  width: 100%;
+  background: var(--bg-0);
+  color: var(--phosphor);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.8em;
+  padding: 0.35em 0.3em;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+.mm-matrix input[type="number"]:focus {
+  outline: none;
+  border-color: var(--phosphor);
+  box-shadow: 0 0 0 3px rgba(91,233,185,0.2);
+}
+.mm-matrix tr.is-hot input { border-color: var(--amber); background: rgba(242,182,90,0.18); color: var(--amber); box-shadow: 0 0 0 1px rgba(242,182,90,0.4); }
+.mm-matrix tr.is-hot th { color: var(--amber); font-weight: 700; }
+.mm-out-row.is-hot .mm-out-label { color: var(--amber); font-weight: 700; }
+.mm-out-row.is-hot .mm-out-val { color: var(--amber); }
+.mm-out-row.is-hot .mm-bar-wrap { border-color: var(--amber); box-shadow: 0 0 0 1px rgba(242,182,90,0.4); }
+.mm-out-row .mm-out-label:hover { color: var(--amber); }
+
+.mm-col.mm-outputs { display: flex; flex-direction: column; }
+.mm-out-grid { width: 100%; font-size: 14px; }
+.mm-out-row {
+  display: grid;
+  grid-template-columns: 90px minmax(60px, 1fr) 56px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mm-out-row .mm-out-label {
+  font-size: 0.95em;
+  color: var(--ink);
+  font-weight: 500;
+  cursor: help;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mm-out-row .mm-bar-wrap {
+  height: 16px;
+  width: 100%;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.mm-out-row .mm-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--phosphor-d), var(--phosphor));
+  border-radius: 999px;
+  width: 0;
+  transition: width 0.25s ease, background 0.2s ease;
+}
+.mm-out-row .mm-bar.neg { background: linear-gradient(90deg, var(--rose), #d45a5a); }
+.mm-out-row .mm-out-val { font-family: var(--mono); color: var(--phosphor); font-size: 0.95em; text-align: right; }
+#mm-verdict { color: var(--phosphor); font-size: 0.9em; margin-top: 0.6em; }
+#mm-verdict strong { color: var(--amber); }
+
+/* ---------- Slide 6: Toy Transformer ---------- */
+#toy-transformer .tt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 1.4em;
+  align-items: center;
+}
+#toy-transformer .tt-vis {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.6em;
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+#toy-transformer .tt-svg { width: 100%; height: 100%; }
+#toy-transformer .tt-info {
+  display: flex; flex-direction: column; gap: 0.6em;
+}
+#toy-transformer .tt-output {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--phosphor);
+  border-radius: var(--radius-sm);
+  padding: 0.7em 1em;
+}
+#toy-transformer .tt-output-label {
+  font-family: var(--mono);
+  font-size: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 0.25em;
+}
+#toy-transformer .tt-output-text {
+  font-family: var(--mono);
+  font-size: 1.1em;
+  color: var(--phosphor);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+#toy-transformer .tt-scores {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.7em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+#toy-transformer .tt-scores th, #toy-transformer .tt-scores td {
+  padding: 0.45em 0.7em;
+  font-family: var(--mono);
+}
+#toy-transformer .tt-scores th {
+  background: var(--bg-3);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: left;
+}
+#toy-transformer .tt-scores tr.is-max td { background: rgba(91,233,185,0.06); }
+#toy-transformer .tt-scores tr.is-max .tt-tok { color: var(--phosphor); font-weight: 700; }
+#toy-transformer .tt-prob-wrap {
+  display: inline-block;
+  width: 90px;
+  height: 8px;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 0.4em;
+}
+#toy-transformer .tt-prob-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--phosphor-d), var(--phosphor));
+  border-radius: 999px;
+}
+#toy-transformer .tt-prob-num { color: var(--ink-soft); font-size: 0.85em; }
+#toy-transformer .tt-emb { color: var(--muted); font-family: var(--mono); font-size: 0.7em; margin-left: 0.4em; }
+#toy-transformer .tt-math {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--cyan);
+  border-radius: var(--radius-sm);
+  padding: 0.6em 0.9em;
+  font-family: var(--mono);
+  font-size: 0.62em;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+#toy-transformer .tt-math-title {
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  margin-bottom: 0.4em;
+}
+#toy-transformer .tt-math .mt { color: var(--amber); font-weight: 700; }
+#toy-transformer .tt-math .ph { color: var(--phosphor); }
+#toy-transformer .tt-math-eq {
+  background: var(--bg-0);
+  padding: 0.4em 0.6em;
+  border-radius: 4px;
+  margin: 0.4em 0;
+}
+#toy-transformer .tt-math-row { margin: 0.15em 0; }
+
+/* ---------- Slide 7: Zoom-out canvas ---------- */
+#zoom-canvas {
+  width: 100%;
+  height: 540px;
+  display: block;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+#zoom-caption {
+  font-family: var(--mono);
+  text-align: center;
+  color: var(--phosphor);
+  margin-top: 0.8em;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Slide 9: Architecture diagram ---------- */
+#arch-diagram {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em;
+  box-shadow: var(--shadow-md);
+}
+#arch-diagram .arch-svg {
+  width: 100%;
+  height: 460px;
+  display: block;
+}
+#arch-diagram .arch-lane-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+#arch-diagram .arch-node rect {
+  fill: var(--bg-3);
+  stroke: var(--line);
+  stroke-width: 1;
+  rx: 6; ry: 6;
+  transition: fill 0.18s, stroke 0.18s;
+}
+#arch-diagram .arch-node text {
+  font-family: var(--sans);
+  font-size: 11px;
+  fill: var(--ink);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+#arch-diagram .arch-node:hover rect { fill: rgba(91,233,185,0.12); stroke: var(--phosphor); cursor: help; }
+#arch-diagram .arch-edge { stroke: var(--line); stroke-width: 1.2; fill: none; opacity: 0.7; }
+#arch-diagram .arch-edge.flow { stroke: var(--phosphor); stroke-dasharray: 4 6; animation: archFlow 1.6s linear infinite; }
+@keyframes archFlow { to { stroke-dashoffset: -20; } }
+
+#arch-diagram .arch-pop {
+  position: absolute;
+  right: 1em;
+  bottom: 1em;
+  max-width: 320px;
+  background: var(--bg-3);
+  border: 1px solid var(--phosphor);
+  border-radius: var(--radius-sm);
+  padding: 0.7em 0.9em;
+  font-size: 0.7em;
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-md);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+}
+#arch-diagram .arch-pop.is-on { opacity: 1; transform: none; }
+#arch-diagram .arch-pop-title { font-family: var(--mono); color: var(--phosphor); font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3em; }
+
+/* lane backgrounds (alternating) */
+.arch-lane-bg { fill: rgba(255,255,255,0.012); }
+
+/* ---------- Slide 10: Agent loop diagram ---------- */
+.agent-loop {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.4em;
+  align-items: center;
+}
+.al-svg-wrap {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.2em;
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.al-svg { width: 100%; height: 100%; }
+.al-node rect {
+  fill: var(--bg-3); stroke: var(--line); stroke-width: 1.5;
+  rx: 8; ry: 8;
+  transition: stroke 0.3s, fill 0.3s, filter 0.3s;
+}
+.al-node.is-active rect {
+  fill: rgba(91,233,185,0.14);
+  stroke: var(--phosphor);
+  filter: drop-shadow(0 0 8px rgba(91,233,185,0.5));
+}
+.al-node text {
+  font-family: var(--sans);
+  font-size: 13px;
+  fill: var(--ink);
+  text-anchor: middle; dominant-baseline: middle;
+  font-weight: 500;
+}
+.al-arrow { stroke: var(--line); stroke-width: 1.8; fill: none; transition: stroke 0.3s, stroke-width 0.3s, filter 0.3s; }
+.al-arrow.is-active { stroke: var(--phosphor); stroke-width: 3.2; filter: drop-shadow(0 0 6px rgba(91,233,185,0.7)); }
+.al-log {
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.9em 1em;
+  font-family: var(--mono);
+  font-size: 0.62em;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  height: 380px;
+  overflow: auto;
+}
+.al-log .l-think  { color: var(--cyan); }
+.al-log .l-act    { color: var(--amber); }
+.al-log .l-obs    { color: var(--phosphor); }
+.al-log .l-line   { opacity: 0; animation: alLineIn 0.4s ease forwards; }
+@keyframes alLineIn { to { opacity: 1; } }
+
+/* ---------- Slide 14: tool typing animation ---------- */
+.tool-typing {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1em;
+}
+.tool-card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em 1.1em;
+  box-shadow: var(--shadow-sm);
+}
+.tool-card .tc-name {
+  font-family: var(--mono); font-size: 0.6em; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--phosphor); margin-bottom: 0.45em;
+}
+.tool-card .tc-body {
+  font-family: var(--mono); font-size: 0.6em; color: var(--ink-soft);
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.6em 0.7em;
+  min-height: 110px;
+  overflow: hidden;
+  position: relative;
+}
+.tool-card .tc-cursor::after {
+  content: '▍';
+  color: var(--phosphor);
+  animation: tcBlink 0.9s steps(2) infinite;
+}
+@keyframes tcBlink { 50% { opacity: 0; } }
+
+/* ---------- Slide 15: MCP hub-and-spokes ---------- */
+.mcp-hub {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5em;
+  align-items: center;
+}
+.mcp-svg-wrap {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em;
+  aspect-ratio: 1.1;
+}
+.mcp-svg { width: 100%; height: 100%; }
+.mcp-hub-center { fill: #1d2a4a; stroke: var(--phosphor); stroke-width: 2.5; filter: drop-shadow(0 0 14px rgba(91,233,185,0.55)); }
+.mcp-spoke      { fill: #2a3654; stroke: rgba(122,217,229,0.55); stroke-width: 1.8; transition: stroke 0.3s, fill 0.3s, filter 0.3s; }
+.mcp-spoke circle { filter: drop-shadow(0 0 6px rgba(122,217,229,0.20)); }
+.mcp-spoke.is-active circle { stroke: var(--violet); stroke-width: 2.6; fill: rgba(181,151,240,0.32); filter: drop-shadow(0 0 14px rgba(181,151,240,0.75)); }
+.mcp-spoke.is-active text { fill: #ffffff; font-weight: 800; }
+.mcp-edge       { stroke: rgba(122,217,229,0.45); stroke-width: 1.6; stroke-dasharray: 4 4; transition: stroke 0.3s, stroke-width 0.3s; }
+.mcp-edge.is-active { stroke: var(--violet); stroke-width: 2.6; animation: mcpFlow 0.9s linear infinite; }
+@keyframes mcpFlow { to { stroke-dashoffset: -16; } }
+.mcp-label { font-family: var(--mono); font-size: 10px; fill: var(--ink-soft); text-anchor: middle; }
+.mcp-spoke text {
+  font-family: var(--sans);
+  font-size: 17px;
+  fill: #F4F8FC;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  paint-order: stroke fill;
+  stroke: rgba(8,14,30,0.65);
+  stroke-width: 0.6px;
+}
+.mcp-center-label { font-family: var(--sans); font-size: 18px; fill: #ffffff; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
+.mcp-center-label.small { font-size: 12px; fill: var(--phosphor); font-weight: 600; }
+
+/* ---------- Slide 17: hollowing-out chart ---------- */
+#hollow-chart-wrap { height: 380px; }
+
+/* ---------- Section / divider slides ---------- */
+.section-divider {
+  text-align: center;
+}
+.section-divider .sd-num {
+  font-family: var(--mono);
+  font-size: 1em;
+  color: var(--muted);
+  letter-spacing: 0.3em;
+  margin-bottom: 0.8em;
+}
+.section-divider .sd-title {
+  font-family: var(--sans);
+  font-size: 2.4em;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.4em;
+  letter-spacing: -0.02em;
+}
+.section-divider .sd-title .accent { color: var(--phosphor); }
+.section-divider .sd-title .accent.amber { color: var(--amber); }
+.section-divider .sd-title .accent.cyan  { color: var(--cyan); }
+.section-divider .sd-title .accent.rose  { color: var(--rose); }
+.section-divider .sd-title .accent.violet{ color: var(--violet); }
+.section-divider .sd-sub {
+  color: var(--ink-soft);
+  font-size: 0.9em;
+  max-width: 30em;
+  margin: 0 auto;
+}
+
+/* ---------- Bullet-pop list (sequentially fade in) ---------- */
+.pop-list { list-style: none; padding: 0; margin: 0; }
+.pop-list li {
+  margin: 0.5em 0;
+  padding: 0.55em 0.85em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--phosphor);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.85em;
+}
+.pop-list li.cyan   { border-left-color: var(--cyan); }
+.pop-list li.amber  { border-left-color: var(--amber); }
+.pop-list li.rose   { border-left-color: var(--rose); }
+.pop-list li.violet { border-left-color: var(--violet); }
+.pop-list li strong { color: var(--ink); }
+
+/* ---------- Slide 23: Takeaways grid ---------- */
+.takeaways-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9em 1em;
+}
+.takeaway {
+  display: flex;
+  gap: 0.9em;
+  align-items: flex-start;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--phosphor);
+  border-radius: var(--radius-sm);
+  padding: 0.8em 1em;
+}
+.takeaway.cyan   { border-left-color: var(--cyan); }
+.takeaway.amber  { border-left-color: var(--amber); }
+.takeaway.violet { border-left-color: var(--violet); }
+.takeaway.rose   { border-left-color: var(--rose); }
+.takeaway:last-child { grid-column: span 2; }
+.takeaway .tw-num {
+  font-family: var(--mono);
+  font-size: 1.6em;
+  font-weight: 700;
+  color: var(--phosphor);
+  line-height: 1;
+  min-width: 1.6em;
+}
+.takeaway.cyan   .tw-num { color: var(--cyan); }
+.takeaway.amber  .tw-num { color: var(--amber); }
+.takeaway.violet .tw-num { color: var(--violet); }
+.takeaway.rose   .tw-num { color: var(--rose); }
+.takeaway .tw-head {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.85em;
+  margin-bottom: 0.2em;
+}
+.takeaway .tw-sub {
+  color: var(--ink-soft);
+  font-size: 0.72em;
+  line-height: 1.45;
+}
+
+/* ---------- Slide 5b: Matrix-multiplication explainer ---------- */
+#matmul-explainer .mmx {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+}
+#matmul-explainer .mmx-eq {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  font-family: var(--mono);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em 1.2em;
+}
+#matmul-explainer .mmx-times,
+#matmul-explainer .mmx-eq-sign {
+  color: var(--muted);
+  font-size: 1.4em;
+  padding: 0 0.2em;
+}
+#matmul-explainer .mmx-mat {
+  display: grid;
+  gap: 4px;
+  padding: 0.4em 0.6em;
+  border-left: 2px solid var(--cyan);
+  border-right: 2px solid var(--cyan);
+}
+#matmul-explainer .mmx-row {
+  display: grid;
+  grid-template-columns: repeat(3, 78px);
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 0.18s;
+}
+#matmul-explainer .mmx-row.active { background: rgba(122,217,229,0.10); }
+#matmul-explainer .mmx-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--phosphor);
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.55em 0.45em;
+  font-family: var(--mono);
+  font-size: 0.9em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+#matmul-explainer .mmx-cell .mmx-sign {
+  display: inline-block;
+  width: 0.6em;
+  text-align: right;
+}
+#matmul-explainer .mmx-cell .mmx-num {
+  display: inline-block;
+  width: 2.2em;
+  text-align: left;
+}
+#matmul-explainer .mmx-cell.hl {
+  background: rgba(242,182,90,0.18);
+  border-color: var(--amber);
+  color: var(--amber);
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px rgba(242,182,90,0.12);
+}
+#matmul-explainer .mmx-cell.done {
+  color: var(--phosphor);
+  border-color: rgba(91,233,185,0.35);
+}
+#matmul-explainer .mmx-vec,
+#matmul-explainer .mmx-out {
+  display: grid;
+  gap: 6px;
+  padding: 0.4em 0.6em;
+  border-left: 2px solid var(--phosphor);
+  border-right: 2px solid var(--phosphor);
+}
+#matmul-explainer .mmx-out { border-color: var(--amber); }
+#matmul-explainer .mmx-vec.mmx-vec-row,
+#matmul-explainer .mmx-out.mmx-vec-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-left: none;
+  border-right: none;
+  border-top: 2px solid var(--phosphor);
+  border-bottom: 2px solid var(--phosphor);
+  padding: 0.4em 0.6em;
+}
+#matmul-explainer .mmx-out.mmx-vec-row {
+  border-top-color: var(--amber);
+  border-bottom-color: var(--amber);
+}
+#matmul-explainer .mmx-vlbl-row,
+#matmul-explainer .mmx-vcells-row {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+#matmul-explainer .mmx-vlbl-row .mmx-vlbl {
+  width: 78px;
+  text-align: center;
+}
+#matmul-explainer .mmx-vrow { display: flex; align-items: center; gap: 0.5em; }
+#matmul-explainer .mmx-vcell {
+  display: inline-block;
+  width: 78px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.55em 0.45em;
+  color: var(--phosphor);
+  font-family: var(--mono);
+  font-size: 0.95em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+#matmul-explainer .mmx-vcell.hl {
+  background: rgba(242,182,90,0.18);
+  border-color: var(--amber);
+  color: var(--amber);
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px rgba(242,182,90,0.12);
+}
+#matmul-explainer .mmx-vcell.done { color: var(--phosphor); border-color: rgba(91,233,185,0.35); }
+#matmul-explainer .mmx-vcell.out { color: var(--muted); }
+#matmul-explainer .mmx-vcell.out.hl { color: var(--amber); }
+#matmul-explainer .mmx-vcell.out.done { color: var(--phosphor); background: rgba(91,233,185,0.10); border-color: rgba(91,233,185,0.4); }
+#matmul-explainer .mmx-vlbl {
+  font-size: 0.65em;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+#matmul-explainer .mmx-explain {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--radius-sm);
+  padding: 0.8em 1.1em;
+  min-height: 90px;
+}
+#matmul-explainer .mmx-step-title {
+  font-family: var(--mono);
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  margin-bottom: 0.35em;
+}
+#matmul-explainer .mmx-step-title.done { color: var(--phosphor); }
+#matmul-explainer .mmx-formula {
+  font-family: var(--mono);
+  font-size: 0.95em;
+  color: var(--ink);
+}
+#matmul-explainer .mmx-formula strong { color: var(--amber); }
+#matmul-explainer .mmx-step-hint { margin-top: 0.4em; }
+
+/* ---------- Slide 6 (rewritten) — Toy transformer matrix multiplication ---------- */
+#toy-transformer .tt-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 1.2em;
+  align-items: stretch;
+}
+#toy-transformer .tt-math-col {
+  display: flex; flex-direction: column; gap: 0.8em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em 1.2em;
+}
+#toy-transformer .tt-output {
+  display: flex; align-items: baseline; gap: 0.8em;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--phosphor);
+  border-radius: 6px;
+  padding: 0.55em 0.85em;
+}
+#toy-transformer .tt-output-label {
+  font-family: var(--mono); font-size: 0.6em; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+}
+#toy-transformer .tt-output-text {
+  font-family: var(--mono); font-size: 0.95em; color: var(--phosphor); font-weight: 600;
+}
+
+#toy-transformer .tt-eq {
+  display: flex; flex-direction: column; gap: 0.4em;
+  padding: 0.6em 0.4em 0.2em;
+}
+#toy-transformer .tt-eq-row {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  text-align: center;
+}
+#toy-transformer .tt-eq-row.tt-eq-vals { gap: 0.5em; }
+#toy-transformer .tt-eq-label {
+  font-family: var(--mono); font-size: 0.55em; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+}
+#toy-transformer .tt-op {
+  font-family: var(--mono); font-size: 1.4em; color: var(--ink-soft); padding: 0 0.2em;
+}
+#toy-transformer .tt-mat {
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(91,233,185,0.04);
+  border: 1px solid rgba(91,233,185,0.2);
+  border-radius: 8px; padding: 6px;
+}
+#toy-transformer .tt-mat-row {
+  display: flex; gap: 4px;
+  padding: 2px; border-radius: 5px;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+#toy-transformer .tt-mat-row.tt-hot {
+  background: rgba(91,233,185,0.18);
+  box-shadow: 0 0 12px rgba(91,233,185,0.35);
+}
+#toy-transformer .tt-cell {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 46px; height: 42px;
+  font-family: var(--mono); font-size: 1.1em; font-weight: 600;
+  background: var(--bg-3); color: var(--ink);
+  border-radius: 5px;
+}
+#toy-transformer .tt-cell.tt-mt { color: var(--phosphor); }
+#toy-transformer .tt-cell.tt-col-hot {
+  background: rgba(91,233,185,0.22);
+  color: var(--phosphor);
+  box-shadow: 0 0 12px rgba(91,233,185,0.45);
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+#toy-transformer .tt-vec-row {
+  flex-direction: row !important;
+}
+#toy-transformer .tt-vec {
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(122,217,229,0.04);
+  border: 1px solid rgba(122,217,229,0.18);
+  border-radius: 8px; padding: 6px;
+}
+#toy-transformer .tt-vec-cell {
+  width: 46px; height: 42px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 1.1em; font-weight: 600;
+  background: var(--bg-3); color: var(--cyan);
+  border-radius: 5px;
+  transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+}
+#toy-transformer .tt-vec-cell.tt-vec-hot {
+  background: rgba(122,217,229,0.18);
+  box-shadow: 0 0 10px rgba(122,217,229,0.35);
+}
+#toy-transformer .tt-vec-cell.tt-out-hot {
+  background: rgba(91,233,185,0.25);
+  color: var(--phosphor);
+  box-shadow: 0 0 12px rgba(91,233,185,0.5);
+}
+#toy-transformer .tt-explain {
+  min-height: 2.6em;
+  padding: 0.55em 0.8em;
+  background: var(--bg-0);
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  font-size: 0.85em; color: var(--ink-soft);
+}
+#toy-transformer .tt-explain .ph {
+  font-family: var(--mono); color: var(--phosphor);
+}
+#toy-transformer .tt-vis {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.8em;
+}
+#toy-transformer .tt-circle-label {
+  font-family: var(--mono); font-size: 0.55em; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted); margin-bottom: 0.4em;
+}
+#toy-transformer .tt-svg { width: 100%; flex: 1; min-height: 0; }
+
+/* ---------- Slide 22 (rewritten) — Moral & legal stacked list ---------- */
+.moral-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7em 1em;
+}
+.moral-row {
+  display: flex; gap: 0.7em; align-items: flex-start;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--rose);
+  border-radius: 8px;
+  padding: 0.65em 0.85em;
+}
+.moral-icon {
+  font-size: 1.4em;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(240,138,138,0.35));
+}
+.moral-body { flex: 1; min-width: 0; }
+.moral-title {
+  font-weight: 600;
+  font-size: 0.95em;
+  color: var(--ink);
+  margin-bottom: 0.15em;
+}
+.moral-text {
+  font-size: 0.78em;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* ---------- Slide 20: Wealth widget pills ---------- */
+.w-pills {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6em;
+}
+.w-pill {
+  cursor: pointer;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7em 0.85em;
+  font-family: var(--mono); font-size: 0.62em;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  text-align: left;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s, transform 0.18s;
+}
+.w-pill .w-pill-label { display: block; font-weight: 600; color: var(--ink); }
+.w-pill .w-pill-value { display: block; margin-top: 0.3em; font-size: 1.4em; color: var(--amber); text-transform: none; letter-spacing: 0; }
+.w-pill:hover { border-color: var(--cyan); transform: translateY(-1px); }
+.w-pill.is-active {
+  border-color: var(--rose);
+  background: rgba(240,138,138,0.08);
+  box-shadow: 0 0 16px rgba(240,138,138,0.22);
+}
+.w-pill.is-active .w-pill-value { color: var(--rose); }
+
+/* ---------- Slide 5 (mood mixer) tweaks — pill-shaped editable cells ---------- */
+.mm-matrix td input[type="number"] {
+  /* pill-shaped editable cell with enough room for negative two-digit values */
+  width: 64px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.95em;
+  color: var(--ink);
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.35em 0.7em;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+.mm-matrix td input[type="number"]:focus {
+  outline: none;
+  border-color: var(--phosphor);
+  background: rgba(91,233,185,0.06);
+  box-shadow: 0 0 0 3px rgba(91,233,185,0.15);
+}
+.mm-matrix td input[type="number"]:hover {
+  border-color: var(--cyan);
+}
+/* Hide spinner controls so the pill stays clean. */
+.mm-matrix td input[type="number"]::-webkit-outer-spin-button,
+.mm-matrix td input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.mm-matrix td input[type="number"] { -moz-appearance: textfield; }

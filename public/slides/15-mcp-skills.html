@@ -1,0 +1,46 @@
+<section>
+  <span class="interactive-badge">animated</span>
+  <h2>MCP servers &amp; Skills — giving models hands</h2>
+  <p class="small muted" style="margin-top:-0.4em;">The model is the <em>brain</em>. MCP servers are the <em>hands and senses</em>. Open standard from Anthropic (Nov 2024), now adopted by OpenAI, Google, GitHub, and ~5,000+ public servers.</p>
+
+  <div class="mcp-hub mt-2">
+    <div class="mcp-svg-wrap">
+      <svg class="mcp-svg" viewBox="0 0 540 400" xmlns="http://www.w3.org/2000/svg">
+        <g class="mcp-edge" data-spoke="0"><line x1="270" y1="200" x2="100" y2="80"/></g>
+        <g class="mcp-edge" data-spoke="1"><line x1="270" y1="200" x2="440" y2="80"/></g>
+        <g class="mcp-edge" data-spoke="2"><line x1="270" y1="200" x2="60"  y2="200"/></g>
+        <g class="mcp-edge" data-spoke="3"><line x1="270" y1="200" x2="480" y2="200"/></g>
+        <g class="mcp-edge" data-spoke="4"><line x1="270" y1="200" x2="100" y2="320"/></g>
+        <g class="mcp-edge" data-spoke="5"><line x1="270" y1="200" x2="440" y2="320"/></g>
+
+        <g class="mcp-hub-center">
+          <circle cx="270" cy="200" r="64"/>
+          <text x="270" y="192" class="mcp-center-label">AI</text>
+          <text x="270" y="214" class="mcp-center-label small">model</text>
+        </g>
+
+        <g class="mcp-spoke" data-spoke="0"><circle cx="100" cy="80"  r="42"/><text x="100" y="80">GitHub</text></g>
+        <g class="mcp-spoke" data-spoke="1"><circle cx="440" cy="80"  r="42"/><text x="440" y="80">Slack</text></g>
+        <g class="mcp-spoke" data-spoke="2"><circle cx="60"  cy="200" r="42"/><text x="60"  y="200">Files</text></g>
+        <g class="mcp-spoke" data-spoke="3"><circle cx="480" cy="200" r="42"/><text x="480" y="200">DB</text></g>
+        <g class="mcp-spoke" data-spoke="4"><circle cx="100" cy="320" r="42"/><text x="100" y="320">Email</text></g>
+        <g class="mcp-spoke" data-spoke="5"><circle cx="440" cy="320" r="42"/><text x="440" y="320">Browser</text></g>
+      </svg>
+      <div class="mcp-label">Model Context Protocol — one socket, many tools.</div>
+    </div>
+
+    <div>
+      <h3 class="c-violet">MCP server</h3>
+      <p>A tiny program that exposes <strong>tools</strong> (do something), <strong>resources</strong> (read something), and <strong>prompts</strong> to any AI client. Same wire format whether you're hitting Slack or your local filesystem.</p>
+
+      <h3 class="c-violet mt-2">Skill</h3>
+      <p>A pre-packaged <em>instruction set</em> the model can load on demand — "how to write good unit tests," "how to follow this team's code style," "how to file an incident report." Think of it as muscle memory the model can swap in.</p>
+
+      <div class="callout violet mt-2">
+        Together: the model brings <strong>reasoning</strong>. MCP brings <strong>reach</strong>. Skills bring <strong>specialization</strong>. That's how a generic chatbot becomes "my company's AI."
+      </div>
+    </div>
+  </div>
+
+  <p class="bg-source">Spec: <code>modelcontextprotocol.io</code> · Skills: Anthropic Agent Skills (2025), GitHub Copilot Skillsets.</p>
+</section>

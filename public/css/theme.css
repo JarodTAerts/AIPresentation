@@ -1,0 +1,646 @@
+/* ==========================================================================
+   AI Presentation Deck — "Dark Terminal / Soft Glow" Theme
+   ==========================================================================
+   Dark near-black background. Phosphor green + soft cyan accents. Amber
+   highlights. Off-white text. Inter for headings/body, JetBrains Mono for
+   numbers and code. Easy to read at a distance, "computery" without being
+   loud.
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --bg-0:        #06080F;            /* deepest */
+  --bg-1:        #0B0F1A;            /* page bg */
+  --bg-2:        #11172A;            /* card bg */
+  --bg-3:        #18213A;            /* raised */
+  --line:        #243049;            /* hairlines */
+  --line-soft:   #1B2236;
+
+  /* Ink */
+  --ink:         #E6EDF3;            /* body */
+  --ink-soft:    #B6C0CE;
+  --muted:       #7D8AA0;
+  --dim:         #4A5470;
+
+  /* Accents */
+  --phosphor:    #5BE9B9;            /* primary */
+  --phosphor-d:  #2FBF94;
+  --cyan:        #7AD9E5;            /* secondary */
+  --cyan-d:      #3FB6C8;
+  --amber:       #F2B65A;            /* highlight */
+  --amber-d:     #D89A36;
+  --rose:        #F08A8A;            /* warnings/negatives */
+  --rose-d:      #D45A5A;
+  --violet:      #B597F0;            /* tertiary */
+  --violet-d:    #8B6FE0;
+
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.35);
+  --shadow-md: 0 12px 36px rgba(0,0,0,0.45);
+  --shadow-lg: 0 24px 72px rgba(0,0,0,0.6);
+  --glow-phos: 0 0 24px rgba(91,233,185,0.18);
+  --glow-cyan: 0 0 24px rgba(122,217,229,0.18);
+  --glow-amber: 0 0 24px rgba(242,182,90,0.18);
+  --radius:    14px;
+  --radius-sm: 8px;
+
+  --mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ---------- Global ---------- */
+html, body { background: var(--bg-1); color: var(--ink); }
+
+.reveal {
+  font-family: var(--sans);
+  font-weight: 400;
+  color: var(--ink);
+  font-size: 26px;
+  letter-spacing: -0.005em;
+}
+
+.reveal-viewport {
+  background:
+    radial-gradient(1400px 900px at 85% -10%, rgba(91,233,185,0.07), transparent 60%),
+    radial-gradient(1100px 800px at -10% 110%, rgba(122,217,229,0.06), transparent 55%),
+    radial-gradient(900px 600px at 50% 120%, rgba(242,182,90,0.04), transparent 60%),
+    var(--bg-1) !important;
+}
+
+/* Faint terminal-grid texture overlay (super subtle) */
+.reveal-viewport::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(91,233,185,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91,233,185,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  z-index: 0;
+}
+
+/* IMPORTANT: do NOT override Reveal's `position: absolute` here — Reveal's
+   centering math (left:50%, transform) only works when .slides is absolutely
+   positioned. Setting position:relative pushes every slide ~80px to the right. */
+.reveal .slides { text-align: left; }
+
+/* Consistent section layout — every slide is 1280×800, padded uniformly so
+   the H2 title always sits at the same screen position. center:false in
+   Reveal means we own vertical positioning; this is intentional. */
+.reveal .slides > section {
+  box-sizing: border-box !important;
+  width: 1280px !important;
+  height: 800px !important;
+  padding: 64px 80px 32px !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+/* Interactive badges live absolutely in the top-right corner; they never
+   participate in the page flow. The badge is also rendered in deep nested
+   trees (e.g. inside .auto-fit-inner) so target it globally per-section. */
+.reveal .slides > section .interactive-badge,
+.reveal .slides > section .anim-badge {
+  position: absolute;
+  top: 22px;
+  right: 26px;
+  margin: 0 !important;
+  z-index: 5;
+}
+/* User asked us to drop the eyebrow + animated tags entirely so titles speak
+   for themselves. Keep CSS harmless. */
+.eyebrow,
+.anim-badge { display: none !important; }
+.reveal .slides > section.title-slide { padding-top: 0 !important; }
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-shadow: none;
+  margin-bottom: 0.5em;
+}
+.reveal h1 { font-size: 2.6em; }
+.reveal h2 { font-size: 1.8em; margin: 0 0 0.4em; }
+.reveal h3 { font-size: 1.2em; color: var(--phosphor); margin-top: 0.6em; }
+.reveal h4 { font-size: 1.05em; color: var(--ink-soft); font-weight: 500; }
+
+.reveal p { line-height: 1.55; color: var(--ink-soft); }
+.reveal a { color: var(--cyan); text-decoration: none; border-bottom: 1px dashed var(--cyan-d); }
+.reveal a:hover { color: var(--cyan-d); }
+
+.reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+.reveal li { margin: 0.35em 0; line-height: 1.5; color: var(--ink-soft); }
+.reveal li::marker { color: var(--phosphor); }
+
+.reveal strong { color: var(--ink); font-weight: 600; }
+.reveal em { color: var(--phosphor); font-style: italic; }
+
+.reveal code, .reveal pre, .reveal .mono {
+  font-family: var(--mono);
+  color: var(--phosphor);
+  background: rgba(91,233,185,0.06);
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+
+.reveal pre {
+  background: var(--bg-2);
+  padding: 1em 1.2em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink-soft);
+  font-size: 0.7em;
+  line-height: 1.5;
+  box-shadow: var(--shadow-sm);
+  overflow: auto;
+}
+
+/* ---------- Reveal controls / progress ---------- */
+.reveal .controls { color: var(--phosphor) !important; }
+.reveal .progress { color: var(--phosphor) !important; height: 4px; background: rgba(255,255,255,0.04); }
+.reveal .progress span { background: linear-gradient(90deg, var(--phosphor), var(--cyan)); }
+.reveal .slide-number {
+  color: var(--muted);
+  background: rgba(11,15,26,0.7);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+  /* Move to bottom-LEFT so we don't pile on top of the Reveal arrow
+     controls + fullscreen button that already live bottom-right. */
+  left: 14px !important;
+  right: auto !important;
+  bottom: 14px !important;
+  top: auto !important;
+}
+
+/* ---------- Eyebrow / Badges ---------- */
+.eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.45em;
+  color: var(--phosphor);
+  background: rgba(91,233,185,0.08);
+  border: 1px solid rgba(91,233,185,0.18);
+  padding: 0.4em 0.9em;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-bottom: 1em;
+  font-family: var(--mono);
+}
+.eyebrow.amber  { color: var(--amber); background: rgba(242,182,90,0.08); border-color: rgba(242,182,90,0.18); }
+.eyebrow.cyan   { color: var(--cyan); background: rgba(122,217,229,0.08); border-color: rgba(122,217,229,0.2); }
+.eyebrow.rose   { color: var(--rose); background: rgba(240,138,138,0.08); border-color: rgba(240,138,138,0.2); }
+.eyebrow.violet { color: var(--violet); background: rgba(181,151,240,0.08); border-color: rgba(181,151,240,0.2); }
+
+.interactive-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  background: rgba(122,217,229,0.12);
+  color: var(--cyan);
+  border: 1px solid rgba(122,217,229,0.3);
+  padding: 0.35em 0.8em;
+  border-radius: 999px;
+  margin-bottom: 0.8em;
+}
+.interactive-badge::before { content: '◉ '; }
+.anim-badge { /* same shape, different label */
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  background: rgba(242,182,90,0.12);
+  color: var(--amber);
+  border: 1px solid rgba(242,182,90,0.3);
+  padding: 0.35em 0.8em;
+  border-radius: 999px;
+  margin-bottom: 0.8em;
+}
+.anim-badge::before { content: '▶ '; }
+
+/* ---------- Title slide ---------- */
+.reveal .slides > section.title-slide {
+  text-align: center !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.title-slide h1 {
+  font-size: 3.0em;
+  margin-bottom: 0.4em;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+}
+.title-slide h1 .good { color: var(--phosphor); text-shadow: var(--glow-phos); }
+.title-slide h1 .bad { color: var(--amber); text-shadow: var(--glow-amber); }
+.title-slide h1 .conj { color: var(--muted); font-weight: 400; }
+.title-slide .subtitle {
+  font-size: 1.05em;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-style: normal;
+  margin-bottom: 2.4em;
+  max-width: 30em;
+  margin-left: auto;
+  margin-right: auto;
+}
+.title-slide .presenter {
+  font-size: 0.65em;
+  color: var(--muted);
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+}
+
+/* Matrix background canvas.
+   Fixed-positioned so it covers the whole viewport (not just the auto-sized
+   section box), giving expressions room to drift across the full slide.
+   Hidden by default; only the title slide that is currently `.present`
+   reveals it. */
+.matrix-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  display: none;
+}
+.reveal .slides > section.present .matrix-bg { display: block; }
+.matrix-bg .mexpr {
+  position: absolute;
+  font-family: var(--mono);
+  color: var(--phosphor);
+  opacity: 0;
+  filter: blur(0.4px);
+  white-space: nowrap;
+  animation: matrixFade 14s linear infinite;
+  user-select: none;
+}
+@keyframes matrixFade {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.96); }
+  18%  { opacity: 0.18; }
+  60%  { opacity: 0.14; }
+  100% { opacity: 0; transform: translateY(-6px) scale(1.02); }
+}
+.title-slide > *:not(.matrix-bg) { position: relative; z-index: 1; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.9em 1.1em;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--line); }
+
+.cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8em;
+  margin-top: 0.9em;
+}
+/* Hook slide variant: bigger cards that grow to fill the empty bottom half. */
+.hook-cards {
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: 1.1em;
+  margin-top: 1.4em;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.hook-cards .card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.4em 1.3em;
+}
+.hook-cards .card .card-num { font-size: 2.6em; margin-bottom: 0.25em; }
+.hook-cards .card .card-title { font-size: 1.12em; line-height: 1.3; margin-bottom: 0.45em; }
+.hook-cards .card .card-sub { font-size: 0.78em; line-height: 1.5; }
+.card .card-title { font-family: var(--sans); font-weight: 600; font-size: 0.98em; color: var(--ink); margin-bottom: 0.3em; }
+.card .card-num { font-family: var(--mono); font-size: 1.8em; font-weight: 600; color: var(--phosphor); line-height: 1; }
+.card .card-sub { font-size: 0.68em; color: var(--muted); margin-top: 0.3em; line-height: 1.45; }
+.card .small, .card p.small { font-size: 0.65em; line-height: 1.45; margin: 0.2em 0; }
+
+.card.accent-phos    { border-left: 4px solid var(--phosphor); }
+.card.accent-cyan    { border-left: 4px solid var(--cyan); }
+.card.accent-amber   { border-left: 4px solid var(--amber); }
+.card.accent-rose    { border-left: 4px solid var(--rose); }
+.card.accent-violet  { border-left: 4px solid var(--violet); }
+
+.card.accent-phos .card-num   { color: var(--phosphor); }
+.card.accent-cyan .card-num   { color: var(--cyan); }
+.card.accent-amber .card-num  { color: var(--amber); }
+.card.accent-rose .card-num   { color: var(--rose); }
+.card.accent-violet .card-num { color: var(--violet); }
+
+/* ---------- Two-column layouts ---------- */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4em; align-items: start; }
+.two-col.narrow-left { grid-template-columns: 0.85fr 1.15fr; }
+.two-col.narrow-right { grid-template-columns: 1.15fr 0.85fr; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2em; align-items: start; }
+
+/* ---------- Forms / interactive controls ---------- */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8em 1em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em 1.2em;
+  box-shadow: var(--shadow-sm);
+}
+.field { display: flex; flex-direction: column; }
+.field label {
+  font-size: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 0.3em;
+  font-weight: 600;
+  font-family: var(--mono);
+}
+.field input[type="number"],
+.field input[type="text"] {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  padding: 0.45em 0.6em;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-0);
+  color: var(--ink);
+  width: 100%;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--phosphor);
+  box-shadow: 0 0 0 3px rgba(91,233,185,0.18);
+}
+.field input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--phosphor-d), var(--cyan-d));
+  outline: none;
+  margin-top: 0.3em;
+}
+.field input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px; width: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--phosphor);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm), var(--glow-phos);
+}
+.field input[type="range"]::-moz-range-thumb {
+  height: 18px; width: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--phosphor);
+  cursor: pointer;
+}
+.field .val {
+  font-family: var(--mono);
+  color: var(--phosphor);
+  font-size: 0.8em;
+  margin-top: 0.2em;
+}
+
+.controls-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  margin-top: 0.6em;
+}
+.hint { color: var(--muted); font-size: 0.65em; font-family: var(--mono); }
+
+.btn {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.7em;
+  padding: 0.55em 1.2em;
+  background: var(--phosphor);
+  color: var(--bg-0);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.btn:hover { background: var(--phosphor-d); transform: translateY(-1px); box-shadow: var(--glow-phos); }
+.btn.ghost {
+  background: transparent;
+  color: var(--phosphor);
+  border: 1.5px solid var(--phosphor-d);
+}
+.btn.ghost:hover { background: rgba(91,233,185,0.08); }
+.btn.amber { background: var(--amber); color: var(--bg-0); }
+.btn.amber:hover { background: var(--amber-d); box-shadow: var(--glow-amber); }
+.btn.cyan { background: var(--cyan); color: var(--bg-0); }
+.btn.cyan:hover { background: var(--cyan-d); box-shadow: var(--glow-cyan); }
+
+/* ---------- Charts ---------- */
+.chart-wrap {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1em;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+.chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+/* ---------- Stats ---------- */
+.stat-row { display: flex; gap: 0.8em; flex-wrap: wrap; margin-top: 0.8em; }
+.stat {
+  flex: 1 1 0;
+  min-width: 130px;
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+  padding: 0.7em 0.9em;
+  border: 1px solid var(--line);
+}
+.stat .stat-label {
+  font-size: 0.48em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-weight: 600;
+  font-family: var(--mono);
+}
+.stat .stat-value {
+  font-family: var(--mono);
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 0.1em;
+}
+.stat .stat-value.phos  { color: var(--phosphor); }
+.stat .stat-value.cyan  { color: var(--cyan); }
+.stat .stat-value.amber { color: var(--amber); }
+.stat .stat-value.rose  { color: var(--rose); }
+
+/* ---------- Tables ---------- */
+.fin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.7em;
+  background: var(--bg-2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--line);
+}
+.fin-table th {
+  background: var(--bg-3);
+  color: var(--ink);
+  text-align: left;
+  padding: 0.7em 0.9em;
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--mono);
+}
+.fin-table td {
+  padding: 0.65em 0.9em;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+}
+.fin-table tr:hover td { background: rgba(91,233,185,0.04); }
+
+/* ---------- Pull-quote / Callouts ---------- */
+.callout {
+  background: var(--bg-2);
+  border-left: 4px solid var(--phosphor);
+  padding: 0.75em 1.1em;
+  border-radius: var(--radius-sm);
+  margin: 0.7em 0;
+  color: var(--ink-soft);
+  font-size: 0.82em;
+  line-height: 1.45;
+}
+.callout.amber { border-left-color: var(--amber); }
+.callout.rose  { border-left-color: var(--rose); }
+.callout.cyan  { border-left-color: var(--cyan); }
+.callout strong { color: var(--ink); }
+
+.pull-quote {
+  font-family: var(--sans);
+  font-style: italic;
+  font-size: 1.4em;
+  color: var(--ink);
+  line-height: 1.3;
+  border-left: 3px solid var(--phosphor);
+  padding-left: 0.9em;
+  margin: 0.5em 0;
+}
+.attrib { color: var(--muted); font-size: 0.7em; margin-top: 0.3em; }
+
+/* ---------- Sizing helpers ---------- */
+.small { font-size: 0.7em; }
+.tiny  { font-size: 0.55em; }
+.muted { color: var(--muted); }
+.dim   { color: var(--dim); }
+.mt-1 { margin-top: 0.6em; }
+.mt-2 { margin-top: 1.2em; }
+.mt-3 { margin-top: 1.8em; }
+.mb-0 { margin-bottom: 0 !important; }
+.center { text-align: center; }
+
+.bg-source {
+  font-family: var(--mono);
+  font-size: 0.45em;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+  margin-top: 1.5em;
+  text-transform: uppercase;
+}
+.bg-source::before { content: '› '; color: var(--phosphor); }
+
+/* ---------- TOC pills ---------- */
+/* Grow to fill remaining vertical space below the H2 and distribute pills
+   evenly so the slide isn't empty in its bottom half. Sized so each item
+   fits comfortably on one line at 1280px. */
+.reveal .toc-list {
+  list-style: none;
+  margin: 0.3em 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  flex: 1 1 auto;
+  justify-content: space-evenly;
+}
+.toc-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.85em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--phosphor);
+  padding: 0.85em 1.2em;
+  border-radius: var(--radius-sm);
+  font-size: 0.95em;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.toc-list li .num {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--muted);
+  width: 1.7em;
+  flex: 0 0 auto;
+  text-align: left;
+}
+.toc-list li.c-cyan   { border-left-color: var(--cyan); }
+.toc-list li.c-amber  { border-left-color: var(--amber); }
+.toc-list li.c-violet { border-left-color: var(--violet); }
+.toc-list li.c-rose   { border-left-color: var(--rose); }
+
+/* ---------- Fullscreen + close buttons (carried over from Finance) ---------- */
+.fullscreen-btn, .close-deck-btn {
+  position: fixed;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(11,15,26,0.78);
+  color: var(--phosphor);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.25s ease, background 0.2s ease, transform 0.15s ease;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+.fullscreen-btn { right: 14px; bottom: 78px; }
+.close-deck-btn { right: 16px; top: 16px; }
+.fullscreen-btn.is-visible, .close-deck-btn.is-visible { opacity: 1; }
+.fullscreen-btn:hover, .close-deck-btn:hover { background: rgba(91,233,185,0.18); transform: scale(1.05); }
+
+/* ---------- Print/PDF (best-effort dark theme) ---------- */
+@media print {
+  .reveal-viewport::before { display: none; }
+}

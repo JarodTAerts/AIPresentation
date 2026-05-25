@@ -1,0 +1,169 @@
+<section>
+  <h2>What an agent actually looks like at work</h2>
+
+  <div class="agent-work mt-1">
+    <!-- LEFT: terminal showing the agent loop -->
+    <div class="agent-term">
+<pre id="tool-typing-pre"><span class="muted">$ copilot</span>
+<span class="prompt-line">&gt; Add a /health endpoint and a test for it.</span>
+
+<span class="ai">🤖 I'll add a health check endpoint. Let me look at your routes first.</span>
+<span class="tool" data-act="open:routes">  → read_file("src/routes.ts")</span>
+<span class="tool-out">    found 4 existing routes</span>
+<span class="tool" data-act="edit:routes">  → edit_file("src/routes.ts")  +8 lines</span>
+<span class="tool" data-act="create:test">  → create_file("test/health.test.ts")  +24 lines</span>
+<span class="tool" data-act="run:tests">  → bash("npm test")</span>
+<span class="tool-out">    PASS  test/health.test.ts (3 tests)</span>
+<span class="tool-out">    PASS  test/routes.test.ts  (12 tests)</span>
+<span class="ai">✅ Added GET /health returning { status: "ok", uptime }. Existing tests still pass.</span>
+</pre>
+    </div>
+
+    <!-- RIGHT: IDE pane that updates in sync -->
+    <div class="agent-ide" id="agent-ide">
+      <div class="ide-chrome">
+        <span class="ide-dot r"></span><span class="ide-dot y"></span><span class="ide-dot g"></span>
+        <div class="ide-title" id="ide-title">project</div>
+      </div>
+      <div class="ide-tabs" id="ide-tabs"></div>
+      <div class="ide-body">
+        <pre class="ide-code" id="ide-code"><span class="ide-empty">(waiting for the agent…)</span></pre>
+      </div>
+      <div class="ide-status" id="ide-status">ready</div>
+    </div>
+  </div>
+
+  <div class="callout cyan mt-2">
+    Notice the loop: <strong>read → think → edit → run tests → check results</strong>. Three years ago this was a research demo. Today it's available in the terminal for $20/month.
+  </div>
+
+  <style>
+    .agent-work {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1em;
+      height: 54vh;          /* fixed: bottom note never jumps */
+    }
+    .agent-term, .agent-ide {
+      background:#06080F;
+      border:1px solid #1d2436;
+      border-radius:10px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .agent-term {
+      padding:1.0em 1.2em;
+      font-family:var(--mono);
+      font-size:0.72em;
+      line-height:1.55;
+      overflow-y:auto;
+    }
+    .agent-term pre { margin:0; white-space:pre-wrap; }
+    .agent-term .muted { color:#6a7388; }
+    .agent-term .prompt-line { color:#7AD9E5; }
+    .agent-term .ai { color:#E6EDF3; }
+    .agent-term .tool { color:#5BE9B9; }
+    .agent-term .tool-out { color:#9aa4ba; }
+    .agent-term .tool.is-active {
+      background: rgba(91,233,185,0.10);
+      box-shadow: inset 2px 0 0 #5BE9B9;
+    }
+
+    /* IDE pane */
+    .agent-ide { font-family: var(--mono); font-size: 0.66em; }
+    .ide-chrome {
+      display:flex; align-items:center; gap:0.4em;
+      padding:0.55em 0.8em;
+      background:#0b0f1a; border-bottom:1px solid #1d2436;
+    }
+    .ide-dot {
+      width:0.7em; height:0.7em; border-radius:50%;
+      display:inline-block; opacity:0.7;
+    }
+    .ide-dot.r { background:#ff5f57; }
+    .ide-dot.y { background:#febc2e; }
+    .ide-dot.g { background:#28c840; }
+    .ide-title {
+      margin-left:0.7em; color:#9aa4ba; font-size:0.95em;
+    }
+    .ide-tabs {
+      display:flex; gap:0;
+      background:#0a0d16; border-bottom:1px solid #1d2436;
+      min-height:1.8em;
+    }
+    .ide-tab {
+      padding:0.45em 0.9em;
+      color:#6a7388;
+      border-right:1px solid #1d2436;
+      cursor:default;
+      transition: background 0.2s, color 0.2s;
+    }
+    .ide-tab.is-active {
+      background:#06080F;
+      color:#E6EDF3;
+      box-shadow: inset 0 2px 0 #5BE9B9;
+    }
+    .ide-tab.is-new {
+      animation: ide-tab-pop 0.45s ease-out;
+    }
+    @keyframes ide-tab-pop {
+      0%   { background: rgba(91,233,185,0.35); }
+      100% { background: #06080F; }
+    }
+    .ide-body {
+      flex:1; min-height:0; overflow:auto;
+      padding:0.6em 0.4em 0.6em 0;
+      background:#06080F;
+    }
+    .ide-code {
+      margin:0; padding:0;
+      white-space: pre;
+      color:#cbd2df;
+      counter-reset: ide-ln;
+    }
+    .ide-code .ide-empty { color:#3d4555; padding-left:1em; font-style:italic; }
+    .ide-line {
+      display:flex;
+      padding:0 0.6em 0 0;
+      min-height:1.35em;
+    }
+    .ide-line::before {
+      counter-increment: ide-ln;
+      content: counter(ide-ln);
+      width: 2.4em;
+      flex-shrink: 0;
+      color: #3d4555;
+      text-align: right;
+      padding-right: 0.8em;
+      user-select: none;
+    }
+    .ide-line.is-added {
+      background: rgba(91,233,185,0.10);
+      box-shadow: inset 2px 0 0 #5BE9B9;
+    }
+    .ide-line.is-just-added {
+      animation: ide-line-flash 0.6s ease-out;
+    }
+    @keyframes ide-line-flash {
+      0%   { background: rgba(91,233,185,0.45); }
+      100% { background: rgba(91,233,185,0.10); }
+    }
+    .ide-code .k { color:#7AD9E5; }       /* keywords */
+    .ide-code .s { color:#F2B65A; }       /* strings */
+    .ide-code .c { color:#5d6577; font-style:italic; } /* comments */
+    .ide-code .f { color:#5BE9B9; }       /* functions */
+    .ide-code .n { color:#cbd2df; }       /* normal */
+    .ide-code .p { color:#9aa4ba; }       /* punctuation */
+    .ide-status {
+      padding:0.4em 0.9em;
+      background:#0b0f1a;
+      border-top:1px solid #1d2436;
+      color:#6a7388;
+      font-size:0.92em;
+    }
+    .ide-status.is-pass { color:#5BE9B9; }
+    .ide-status.is-run  { color:#F2B65A; }
+  </style>
+</section>

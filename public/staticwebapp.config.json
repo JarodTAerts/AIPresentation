@@ -1,0 +1,14 @@
+{
+  "routes": [
+    { "route": "/", "rewrite": "/index.html" },
+    { "route": "/presentation", "rewrite": "/presentation.html" },
+    { "route": "/presentation/*", "rewrite": "/presentation.html" }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*", "/css/*", "/js/*", "/slides/*", "/*.{js,css,svg,png,jpg,ico,json,html}"]
+  },
+  "mimeTypes": {
+    ".json": "application/json"
+  }
+}

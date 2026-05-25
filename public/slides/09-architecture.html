@@ -1,0 +1,104 @@
+<section>
+  <span class="eyebrow cyan">architecture · hover any box</span>
+  <h2>The whole stack — not just the model</h2>
+
+  <div id="arch-diagram" class="mt-1">
+    <svg class="arch-svg" viewBox="0 0 1100 460" xmlns="http://www.w3.org/2000/svg">
+      <!-- lane backgrounds (alternating) -->
+      <rect class="arch-lane-bg" x="0" y="20"  width="1100" height="70"/>
+      <rect class="arch-lane-bg" x="0" y="180" width="1100" height="80"/>
+      <rect class="arch-lane-bg" x="0" y="340" width="1100" height="70"/>
+
+      <!-- lane labels -->
+      <text class="arch-lane-label" x="10" y="55"  >Input</text>
+      <text class="arch-lane-label" x="10" y="135" >Safety · Pre</text>
+      <text class="arch-lane-label" x="10" y="220" >Model core (LLM)</text>
+      <text class="arch-lane-label" x="10" y="300" >Tools · Knowledge</text>
+      <text class="arch-lane-label" x="10" y="375" >Safety · Post</text>
+      <text class="arch-lane-label" x="10" y="445" >Output / Logging</text>
+
+      <!-- Lane 1: Input -->
+      <g class="arch-node" data-arch-title="User prompt" data-arch-info="The raw message from the user — text, image, audio, file uploads.">
+        <rect x="120" y="34" width="170" height="42"/><text x="205" y="56">User prompt</text>
+      </g>
+      <g class="arch-node" data-arch-title="System prompt" data-arch-info="The hidden persona/rules the company injects (e.g. 'You are Claude, made by Anthropic. Refuse X. Follow Y.').">
+        <rect x="320" y="34" width="170" height="42"/><text x="405" y="56">System prompt</text>
+      </g>
+      <g class="arch-node" data-arch-title="Conversation memory" data-arch-info="Past turns + any persistent facts the assistant has stored about you.">
+        <rect x="520" y="34" width="170" height="42"/><text x="605" y="56">Memory</text>
+      </g>
+      <g class="arch-node" data-arch-title="Multimodal encoder" data-arch-info="Images / audio / video / PDFs converted into the same kind of vectors the model thinks in.">
+        <rect x="720" y="34" width="200" height="42"/><text x="820" y="56">Multimodal encoder</text>
+      </g>
+
+      <!-- Lane 2: Pre-safety -->
+      <g class="arch-node" data-arch-title="Input safety filter" data-arch-info="Classifiers that flag jailbreak attempts, illegal requests, PII, prompt-injection. Block or rewrite before the model sees it.">
+        <rect x="220" y="105" width="200" height="42"/><text x="320" y="127">Input safety filter</text>
+      </g>
+      <g class="arch-node" data-arch-title="Router / model selection" data-arch-info="Lightweight model picks WHICH model to use (cheap vs. expensive, fast vs. thinking). Saves cost.">
+        <rect x="480" y="105" width="200" height="42"/><text x="580" y="127">Router</text>
+      </g>
+      <g class="arch-node" data-arch-title="Prompt builder" data-arch-info="Concatenates system + memory + retrieved docs + user prompt + tool descriptions into one big context window.">
+        <rect x="740" y="105" width="200" height="42"/><text x="840" y="127">Prompt builder</text>
+      </g>
+
+      <!-- Lane 3: Model core (big box) -->
+      <g class="arch-node" data-arch-title="LLM core (transformer)" data-arch-info="The trillion-parameter neural net. Token-in → next-token-out. Everything else is plumbing around this box.">
+        <rect x="350" y="190" width="400" height="60"/><text x="550" y="220">LLM core · trillion-param transformer</text>
+      </g>
+      <g class="arch-node" data-arch-title="Reasoning loop" data-arch-info="Newer models generate a private 'thinking' scratchpad before answering. Trades latency for accuracy.">
+        <rect x="780" y="190" width="160" height="60"/><text x="860" y="220">Thinking</text>
+      </g>
+
+      <!-- Lane 4: Tools / knowledge -->
+      <g class="arch-node" data-arch-title="Tool use (function calling)" data-arch-info="The model can emit a structured tool call. The runtime executes it (HTTP request, code execution, etc.) and feeds the result back.">
+        <rect x="120" y="270" width="180" height="42"/><text x="210" y="292">Tools / functions</text>
+      </g>
+      <g class="arch-node" data-arch-title="Retrieval (RAG)" data-arch-info="Vector-search the company's docs/web/your files, then paste relevant chunks into the prompt.">
+        <rect x="320" y="270" width="170" height="42"/><text x="405" y="292">Retrieval / RAG</text>
+      </g>
+      <g class="arch-node" data-arch-title="Sandboxed code execution" data-arch-info="Python / shell in a locked-down container. Lets the model do real math, run scripts, edit files.">
+        <rect x="510" y="270" width="180" height="42"/><text x="600" y="292">Code sandbox</text>
+      </g>
+      <g class="arch-node" data-arch-title="External APIs" data-arch-info="Web search, calendar, email, GitHub, your CRM, etc. — usually via MCP servers (more on those soon).">
+        <rect x="710" y="270" width="170" height="42"/><text x="795" y="292">External APIs</text>
+      </g>
+      <g class="arch-node" data-arch-title="Specialist sub-models" data-arch-info="Smaller models the orchestrator calls for narrow jobs: OCR, voice, image-gen, embeddings.">
+        <rect x="900" y="270" width="170" height="42"/><text x="985" y="292">Sub-models</text>
+      </g>
+
+      <!-- Lane 5: Post-safety -->
+      <g class="arch-node" data-arch-title="Output safety filter" data-arch-info="Classifiers on the response: PII leakage, harmful content, brand violations, copyrighted text. May redact or refuse.">
+        <rect x="280" y="350" width="220" height="42"/><text x="390" y="372">Output safety filter</text>
+      </g>
+      <g class="arch-node" data-arch-title="Citation / attribution" data-arch-info="If retrieval was used, attach which sources the answer drew from.">
+        <rect x="540" y="350" width="200" height="42"/><text x="640" y="372">Citation / attribution</text>
+      </g>
+      <g class="arch-node" data-arch-title="Self-check / critique" data-arch-info="Some setups run a second model pass to verify code compiles, math adds up, or claims are supported.">
+        <rect x="780" y="350" width="180" height="42"/><text x="870" y="372">Self-check</text>
+      </g>
+
+      <!-- Lane 6: Output / logging -->
+      <g class="arch-node" data-arch-title="Streaming output" data-arch-info="Tokens stream to the UI as they're produced (the typing effect you see).">
+        <rect x="220" y="420" width="180" height="32"/><text x="310" y="436">Stream to user</text>
+      </g>
+      <g class="arch-node" data-arch-title="Telemetry / logging" data-arch-info="Latency, cost, refusal rate, user feedback — fed back into training data for the next model version.">
+        <rect x="440" y="420" width="200" height="32"/><text x="540" y="436">Telemetry</text>
+      </g>
+      <g class="arch-node" data-arch-title="RLHF feedback loop" data-arch-info="Thumbs up/down and edits become training signal. Closing the loop is how the model keeps improving.">
+        <rect x="680" y="420" width="200" height="32"/><text x="780" y="436">RLHF feedback</text>
+      </g>
+
+      <!-- A few connecting edges (left intentionally sparse) -->
+      <path class="arch-edge flow" d="M320,147 C420,170 460,180 550,190"/>
+      <path class="arch-edge flow" d="M750,220 C800,250 250,270 210,270"/>
+      <path class="arch-edge flow" d="M550,250 L550,270"/>
+      <path class="arch-edge flow" d="M550,312 C530,330 410,340 390,350"/>
+      <path class="arch-edge flow" d="M390,392 L310,420"/>
+    </svg>
+
+    <div class="arch-pop"><div class="arch-pop-title">Hover any box</div><div class="arch-pop-body">…to see what it does.</div></div>
+  </div>
+
+  <p class="bg-source">Sources: Anthropic system-card disclosures · OpenAI ChatGPT architecture posts · arXiv 2401.05459 (LLM Agent surveys) · Karpathy "LLM OS" talks.</p>
+</section>

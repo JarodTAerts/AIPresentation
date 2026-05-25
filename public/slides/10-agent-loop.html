@@ -1,0 +1,38 @@
+<section>
+  <span class="interactive-badge">animated</span>
+  <h2>The agent loop — think, act, observe, repeat</h2>
+  <p class="small muted" style="margin-top:-0.4em;">2022 = a chatbot that answers in one shot. 2026 = a model that <strong>uses tools, checks its own work, and keeps going</strong> until the job is done. A small architectural change. A big practical one.</p>
+
+  <div class="agent-loop mt-2">
+    <div class="al-svg-wrap">
+      <svg class="al-svg" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="al-mark" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 z" fill="#5BE9B9"/>
+          </marker>
+        </defs>
+
+        <g class="al-node" id="al-think" data-step="0">
+          <rect x="130" y="20" width="100" height="60"/><text x="180" y="50">Think</text>
+        </g>
+        <g class="al-node" id="al-act" data-step="1">
+          <rect x="240" y="150" width="100" height="60"/><text x="290" y="180">Act</text>
+        </g>
+        <g class="al-node" id="al-obs" data-step="2">
+          <rect x="130" y="280" width="100" height="60"/><text x="180" y="310">Observe</text>
+        </g>
+        <g class="al-node" id="al-repeat" data-step="3">
+          <rect x="20" y="150" width="100" height="60"/><text x="70" y="180">Repeat?</text>
+        </g>
+
+        <path class="al-arrow" id="al-arr-0" d="M230,55 C290,55 320,100 290,150" marker-end="url(#al-mark)"/>
+        <path class="al-arrow" id="al-arr-1" d="M290,210 C290,260 240,290 230,310" marker-end="url(#al-mark)"/>
+        <path class="al-arrow" id="al-arr-2" d="M130,310 C70,310 40,260 70,210" marker-end="url(#al-mark)"/>
+        <path class="al-arrow" id="al-arr-3" d="M70,150 C70,100 110,55 130,55" marker-end="url(#al-mark)"/>
+      </svg>
+    </div>
+    <div class="al-log" id="al-log">
+      <!-- populated by widgets.js when the slide is active -->
+    </div>
+  </div>
+</section>

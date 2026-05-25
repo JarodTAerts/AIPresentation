@@ -1,0 +1,44 @@
+<section>
+  <span class="eyebrow amber">the tools</span>
+  <h2>What "AI coding tools" actually are</h2>
+  <p class="small muted" style="margin-top:-0.4em;">Three generations, all live in market today.</p>
+
+  <div class="cards-row mt-2">
+    <div class="card accent-cyan">
+      <div class="card-num">Gen 1</div>
+      <div class="card-title">Autocomplete</div>
+      <div class="card-sub"><strong>GitHub Copilot, Cursor Tab.</strong> Suggests the next 1–10 lines as you type. Lives <em>inside</em> the editor.</div>
+    </div>
+    <div class="card accent-phos">
+      <div class="card-num">Gen 2</div>
+      <div class="card-title">Chat &amp; edit</div>
+      <div class="card-sub"><strong>Copilot Chat, Cursor Composer.</strong> "Refactor this function." "Add a test for X." Reads files, proposes diffs, you apply.</div>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-num">Gen 3</div>
+      <div class="card-title">Agents</div>
+      <div class="card-sub"><strong>Claude Code, Copilot CLI, Devin, Aider.</strong> Run shell commands, edit many files, run tests in a loop until the task is done — minutes of autonomous work per turn.</div>
+    </div>
+  </div>
+
+  <div class="two-col mt-2">
+    <div>
+      <h3 class="c-cyan">How they actually work</h3>
+      <ol class="pop-list">
+        <li>Gather context — read the open file, related files, project structure.</li>
+        <li>Send to an LLM with a <em>system prompt</em> that says "you are a coding assistant, here are your tools."</li>
+        <li>Stream the response back. If it's an agent, execute any tool calls (read_file, run_tests, edit) and feed results back.</li>
+        <li>Loop until the model says "done" or the user stops it.</li>
+      </ol>
+    </div>
+    <div>
+      <h3 class="c-amber">The numbers</h3>
+      <ul class="pop-list">
+        <li><strong>84%</strong> of developers use AI tools daily/weekly (Stack Overflow 2025).</li>
+        <li><strong>55%</strong> faster on representative coding tasks in GitHub's own studies.</li>
+        <li><strong>BUT:</strong> METR's RCT with experienced open-source devs found AI made them <strong>19% slower</strong> on familiar code — they overestimated speedup by 20pp.</li>
+      </ul>
+      <p class="bg-source">Sources: GitHub Octoverse 2025, METR <em>Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity</em>.</p>
+    </div>
+  </div>
+</section>

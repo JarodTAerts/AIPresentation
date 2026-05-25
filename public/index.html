@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generative AI · The good vibes and the bad</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-0:        #06080F;
+      --bg-1:        #0B0F1A;
+      --bg-2:        #11172A;
+      --bg-3:        #18213A;
+      --line:        #243049;
+      --ink:         #E6EDF3;
+      --ink-soft:    #B6C0CE;
+      --muted:       #7D8AA0;
+      --phosphor:    #5BE9B9;
+      --phosphor-d:  #2FBF94;
+      --cyan:        #7AD9E5;
+      --amber:       #F2B65A;
+      --rose:        #F08A8A;
+      --violet:      #B597F0;
+      --mono:        'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      --sans:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg-1); color: var(--ink); }
+    body {
+      font-family: var(--sans);
+      line-height: 1.55;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 800px at 85% -10%, rgba(91,233,185,0.10), transparent 60%),
+        radial-gradient(1000px 700px at -10% 110%, rgba(122,217,229,0.08), transparent 55%),
+        radial-gradient(700px 500px at 50% 120%, rgba(242,182,90,0.05), transparent 60%),
+        var(--bg-1);
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(91,233,185,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91,233,185,0.03) 1px, transparent 1px);
+      background-size: 56px 56px;
+      z-index: 0;
+    }
+
+    main { max-width: 980px; margin: 0 auto; padding: 4rem 1.5rem 6rem; position: relative; z-index: 1; }
+
+    .hero { text-align: center; margin-top: 2rem; }
+    .eyebrow {
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.7rem;
+      color: var(--phosphor);
+      background: rgba(91,233,185,0.08);
+      border: 1px solid rgba(91,233,185,0.18);
+      padding: 0.45em 1em;
+      border-radius: 999px;
+      font-weight: 600;
+      font-family: var(--mono);
+      margin-bottom: 1.4em;
+    }
+    .hero h1 {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: clamp(2.4rem, 5.4vw, 4rem);
+      line-height: 1.1;
+      margin: 0 0 0.4em 0;
+      letter-spacing: -0.025em;
+    }
+    .hero h1 .good { color: var(--phosphor); text-shadow: 0 0 24px rgba(91,233,185,0.25); }
+    .hero h1 .bad  { color: var(--amber);    text-shadow: 0 0 24px rgba(242,182,90,0.25); }
+    .hero h1 .conj { color: var(--muted); font-weight: 400; }
+    .hero h1 .dim  { color: var(--ink-soft); font-weight: 500; }
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--ink-soft);
+      max-width: 38em;
+      margin: 0 auto 2.2em;
+    }
+    .cta-row {
+      display: inline-flex; gap: 0.8em; flex-wrap: wrap; justify-content: center;
+      margin-top: 0.5em;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5em;
+      padding: 0.8em 1.5em;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+      cursor: pointer; border: none;
+      font-family: var(--sans);
+    }
+    .btn-primary {
+      background: var(--phosphor); color: var(--bg-0);
+      box-shadow: 0 6px 24px rgba(91,233,185,0.28);
+    }
+    .btn-primary:hover { background: var(--phosphor-d); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(91,233,185,0.42); }
+    .btn-ghost {
+      background: rgba(255,255,255,0.04); color: var(--phosphor);
+      border: 1.5px solid var(--phosphor-d);
+    }
+    .btn-ghost:hover { background: rgba(91,233,185,0.08); transform: translateY(-2px); }
+    .btn .arrow { transition: transform 0.2s ease; }
+    .btn:hover .arrow { transform: translateX(3px); }
+
+    section.deck-feature {
+      margin-top: 4rem;
+      background: var(--bg-2);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 2rem;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.6em;
+      align-items: center;
+    }
+    .deck-feature h2 {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.6rem;
+      margin: 0 0 0.4em 0;
+      color: var(--ink);
+    }
+    .deck-feature p { margin: 0 0 0.4em 0; color: var(--ink-soft); }
+    .deck-feature .meta {
+      display: inline-flex; gap: 0.6em; flex-wrap: wrap; margin-top: 0.6em;
+    }
+    .chip {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.3em 0.85em; border-radius: 999px;
+      background: rgba(122,217,229,0.1); color: var(--cyan);
+      border: 1px solid rgba(122,217,229,0.2);
+      font-family: var(--mono);
+    }
+    .chip.phos  { background: rgba(91,233,185,0.1);  color: var(--phosphor); border-color: rgba(91,233,185,0.22); }
+    .chip.amber { background: rgba(242,182,90,0.1);  color: var(--amber);    border-color: rgba(242,182,90,0.22); }
+
+    h2.section-heading {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.8rem;
+      margin: 4rem 0 1.2em;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1em;
+    }
+    .topic-card {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.3em 1.4em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--phosphor);
+    }
+    .topic-card.cyan::before   { background: var(--cyan); }
+    .topic-card.amber::before  { background: var(--amber); }
+    .topic-card.rose::before   { background: var(--rose); }
+    .topic-card.violet::before { background: var(--violet); }
+    .topic-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.5); border-color: rgba(91,233,185,0.4); }
+    .topic-card .icon { font-size: 1.6rem; line-height: 1; margin-bottom: 0.5em; }
+    .topic-card h3 {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 0 0 0.4em;
+      color: var(--ink);
+    }
+    .topic-card p { margin: 0; color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; }
+
+    footer {
+      max-width: 980px; margin: 0 auto; padding: 0 1.5rem 3rem;
+      color: var(--muted); font-size: 0.8rem; text-align: center; position: relative; z-index: 1;
+    }
+    footer a { color: var(--phosphor); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      section.deck-feature { grid-template-columns: 1fr; text-align: center; }
+    }
+
+    /* Ambient drifting matrix-multiply backdrop — same idea as the title slide,
+       but at a slower cadence and even fainter. */
+    .matrix-bg-page { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .matrix-bg-page .mexpr {
+      position: absolute;
+      font-family: var(--mono);
+      color: var(--phosphor);
+      opacity: 0;
+      white-space: nowrap;
+      animation: matrixFadePage 18s linear infinite;
+      filter: blur(0.4px);
+      user-select: none;
+    }
+    @keyframes matrixFadePage {
+      0%   { opacity: 0; transform: translateY(8px); }
+      20%  { opacity: 0.12; }
+      70%  { opacity: 0.09; }
+      100% { opacity: 0; transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="matrix-bg-page" id="page-matrix-bg" aria-hidden="true"></div>
+
+<main>
+  <section class="hero">
+    <span class="eyebrow">A non-technical tour</span>
+    <h1>
+      <span class="dim">Generative AI:</span><br>
+      The <span class="good">good vibes</span> <span class="conj">and the</span> <span class="bad">bad</span>
+    </h1>
+    <p class="subtitle">What it is, how it works, and what it's already changing — explained without assuming you took linear algebra.</p>
+    <div class="cta-row">
+      <a href="/presentation" class="btn btn-primary">
+        Watch the presentation <span class="arrow">→</span>
+      </a>
+      <a href="/presentation/1" class="btn btn-ghost">Open slides directly</a>
+    </div>
+  </section>
+
+  <section class="deck-feature">
+    <div>
+      <h2>The deck: <span style="font-weight:500; color:var(--ink-soft);">~30 min, 24 interactive slides</span></h2>
+      <p>Walk through the math underneath today's AI, a 5-second working "transformer," the actual architecture of a modern assistant, what's changing in coding and knowledge work — and the honest costs (energy, wealth concentration, jobs, ethics). Every chart and widget is editable; try your own numbers.</p>
+      <div class="meta">
+        <span class="chip phos">~30 minutes</span>
+        <span class="chip">Interactive</span>
+        <span class="chip amber">Beginner-friendly</span>
+      </div>
+    </div>
+    <a href="/presentation" class="btn btn-primary">Watch <span class="arrow">→</span></a>
+  </section>
+
+  <h2 class="section-heading">What you'll see</h2>
+  <div class="topic-grid">
+    <div class="topic-card">
+      <div class="icon">🧮</div>
+      <h3>The math, plainly</h3>
+      <p>Linear algebra without the algebra. A 3×3 mixer you can drag. A toy transformer that actually spells a word.</p>
+    </div>
+    <div class="topic-card cyan">
+      <div class="icon">🏗️</div>
+      <h3>What's inside a modern AI</h3>
+      <p>Hover over each piece of a real architecture diagram — safety filters, tool use, retrieval, the model core, and more.</p>
+    </div>
+    <div class="topic-card amber">
+      <div class="icon">💻</div>
+      <h3>AI &amp; code</h3>
+      <p>How "vibe-coding" works, why models pass software-engineering benchmarks now, and the honest caveats.</p>
+    </div>
+    <div class="topic-card violet">
+      <div class="icon">🔌</div>
+      <h3>The new plumbing</h3>
+      <p>MCP servers and "Skills" — the duct tape connecting models to the rest of the software you use.</p>
+    </div>
+    <div class="topic-card rose">
+      <div class="icon">⚖️</div>
+      <h3>Costs &amp; trade-offs</h3>
+      <p>Datacenter energy, hardware shortages, wealth concentration, and the entry-level jobs being hollowed out.</p>
+    </div>
+    <div class="topic-card">
+      <div class="icon">🔭</div>
+      <h3>Where it's going</h3>
+      <p>Three plausible 5-year scenarios — without hype and without doom.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Sources cited inline · A non-technical, plain-English explainer ·
+  <a href="/presentation">Open the deck</a>
+</footer>
+
+<script>
+  // Same drifting matrix-multiply backdrop as the title slide.
+  (function () {
+    const wrap = document.getElementById('page-matrix-bg');
+    if (!wrap) return;
+    const rand = (a, b) => Math.floor(a + Math.random() * (b - a));
+    const expr = () => {
+      const a = rand(0, 9), b = rand(0, 9), c = rand(0, 9), d = rand(0, 9);
+      const x = rand(0, 9), y = rand(0, 9);
+      const r1 = a * x + b * y, r2 = c * x + d * y;
+      return `[${a} ${b}; ${c} ${d}] · [${x}; ${y}] = [${r1}; ${r2}]`;
+    };
+    for (let i = 0; i < 16; i++) {
+      const el = document.createElement('div');
+      el.className = 'mexpr';
+      el.textContent = expr();
+      const size = 0.7 + Math.random() * 0.6;
+      el.style.fontSize = size.toFixed(2) + 'rem';
+      el.style.left = rand(2, 92) + '%';
+      el.style.top  = rand(4, 94) + '%';
+      el.style.animationDuration = (14 + Math.random() * 12).toFixed(1) + 's';
+      el.style.animationDelay    = (-Math.random() * 18).toFixed(1) + 's';
+      // Avoid drawing right under the hero block (~middle)
+      const lp = parseFloat(el.style.left), tp = parseFloat(el.style.top);
+      if (lp > 22 && lp < 70 && tp > 8 && tp < 38) {
+        el.style.left = (lp < 46 ? rand(2, 18) : rand(74, 92)) + '%';
+      }
+      wrap.appendChild(el);
+    }
+    setInterval(() => {
+      const items = wrap.querySelectorAll('.mexpr');
+      const pick = items[rand(0, items.length)];
+      if (pick) pick.textContent = expr();
+    }, 2200);
+  })();
+</script>
+</body>
+</html>
