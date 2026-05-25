@@ -1,0 +1,170 @@
+<section data-background-color="#06080F">
+  <h2>So how does the model's weight matrix get <span class="accent phos">filled in</span>?</h2>
+  <p class="small muted" style="margin-top:-0.4em;">Nobody types in a trillion numbers. They get <strong>learned</strong> from staggering amounts of text — by playing fill-in-the-blank, billions of times.</p>
+
+  <style>
+    .train-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.7em;
+      margin-top: 1em;
+      align-items: stretch;
+      position: relative;
+    }
+    .train-step {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.7em 0.8em 0.8em;
+      position: relative;
+      display: flex; flex-direction: column;
+    }
+    .train-step .ts-num {
+      font-family: var(--mono);
+      font-size: 0.68em;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--phosphor);
+      margin-bottom: 0.3em;
+    }
+    .train-step .ts-title {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.98em;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 0.3em;
+    }
+    .train-step .ts-body {
+      font-size: 0.68em;
+      color: var(--ink-soft);
+      line-height: 1.45;
+      flex: 1;
+    }
+    .train-step .ts-body code {
+      background: rgba(91,233,185,0.08);
+      border: 1px solid rgba(91,233,185,0.18);
+      color: var(--phosphor);
+      font-size: 0.92em;
+      padding: 0.05em 0.4em;
+      border-radius: 4px;
+    }
+    .train-step .ts-stat {
+      margin-top: 0.5em;
+      padding-top: 0.45em;
+      border-top: 1px dashed var(--line);
+      font-family: var(--mono);
+      font-size: 0.66em;
+      color: var(--cyan);
+    }
+    .train-step::after {
+      content: '→';
+      position: absolute;
+      right: -0.62em;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono);
+      font-size: 1.4em;
+      color: var(--phosphor);
+      background: var(--bg-1);
+      padding: 0 0.2em;
+      z-index: 2;
+      text-shadow: 0 0 8px rgba(91,233,185,0.4);
+    }
+    .train-step:last-child::after { content: ''; }
+    .train-step.ts-cyan   .ts-num { color: var(--cyan); }
+    .train-step.ts-amber  .ts-num { color: var(--amber); }
+    .train-step.ts-violet .ts-num { color: var(--violet); }
+
+    .train-key {
+      margin-top: 0.75em;
+      background: linear-gradient(90deg, rgba(91,233,185,0.06), rgba(122,217,229,0.04) 50%, transparent);
+      border-left: 3px solid var(--phosphor);
+      border-radius: 6px;
+      padding: 0.6em 0.9em;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.55em 0.9em;
+      align-items: center;
+      font-size: 0.72em;
+      color: var(--ink-soft);
+      line-height: 1.45;
+    }
+    .train-key .tk-label {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--phosphor);
+      font-weight: 600;
+    }
+    .train-key strong { color: var(--ink); }
+    .train-key .tk-row {
+      display: contents;
+    }
+
+    .nt-example {
+      margin-top: 0.45em;
+      font-family: var(--mono);
+      font-size: 0.88em;
+      color: var(--ink-soft);
+      background: rgba(122,217,229,0.04);
+      padding: 0.3em 0.55em;
+      border-radius: 4px;
+      border: 1px dashed rgba(122,217,229,0.2);
+      line-height: 1.4;
+    }
+    .nt-example .blank {
+      color: var(--amber);
+      font-weight: 700;
+    }
+    .nt-example .guess { color: var(--phosphor); }
+  </style>
+
+  <div class="train-flow mt-1">
+    <div class="train-step">
+      <div class="ts-num">Step 01 · Gather</div>
+      <div class="ts-title">Collect the internet</div>
+      <div class="ts-body">
+        Pull <strong>~15+ trillion words</strong> of human text: web pages, books, Wikipedia, scientific papers, GitHub code, forum posts. Clean it, dedupe it, filter junk.
+      </div>
+      <div class="ts-stat">≈ 50,000× all of Wikipedia</div>
+    </div>
+
+    <div class="train-step ts-cyan">
+      <div class="ts-num">Step 02 · Predict</div>
+      <div class="ts-title">Play fill-in-the-blank</div>
+      <div class="ts-body">
+        Show the model a piece of real text with the next word hidden. Ask it to guess. <strong>That's it. That's the whole game.</strong>
+        <div class="nt-example">"The cat sat on the <span class="blank">___</span>" → <span class="guess">mat</span></div>
+      </div>
+      <div class="ts-stat">repeated trillions of times</div>
+    </div>
+
+    <div class="train-step ts-amber">
+      <div class="ts-num">Step 03 · Adjust</div>
+      <div class="ts-title">Nudge the weights</div>
+      <div class="ts-body">
+        Wrong guess? Every number in the matrix gets bumped a tiny bit — in the direction that would have made the answer <em>less</em> wrong. Statistics, not understanding.
+      </div>
+      <div class="ts-stat">≈ trillions of tiny nudges</div>
+    </div>
+
+    <div class="train-step ts-violet">
+      <div class="ts-num">Step 04 · Refine</div>
+      <div class="ts-title">Polish with humans</div>
+      <div class="ts-body">
+        After the base model knows language statistically, humans rate its answers (helpful? safe? honest?). The weights get nudged one more time to behave like an assistant, not an autocomplete.
+      </div>
+      <div class="ts-stat">RLHF + instruction tuning</div>
+    </div>
+  </div>
+
+  <div class="train-key">
+    <div class="tk-label">⚡ Scale</div>
+    <div>A single frontier training run: <strong>~tens of thousands of GPUs</strong> running <strong>weeks to months</strong>, costing <strong>$100M+</strong>. The "weights" are the leftover residue — every statistical pattern in human language, compressed into a trillion numbers.</div>
+  </div>
+
+  <p class="bg-source">Llama 3 trained on ~15T tokens · GPT-4 reportedly $100M+ compute · Modern frontier runs: 25K–100K+ H100/B200 GPUs for months.</p>
+</section>

@@ -14,6 +14,7 @@ window.SLIDE_MANIFEST = [
   'slides/05-mood-mixer.html',
   'slides/06-toy-transformer.html',
   'slides/07-zoom-out.html',
+  'slides/07b-training.html',
   'slides/08-section-architecture.html',
   'slides/09-architecture.html',
   'slides/10-agent-loop.html',

@@ -3,6 +3,36 @@
    zoom-out canvas, architecture diagram, agent loop, MCP hub, etc.)
    ========================================================================== */
 
+/* ---------- Reusable "(Model)" tag — used on weight matrices to remind
+   the audience that the matrix IS the AI model in our toy examples.
+   ---------------------------------------------------------------------- */
+.model-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 0.5em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.1em 0.55em;
+  vertical-align: middle;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+/* "Floating" variant — for sitting above a matrix without affecting layout. */
+.model-tag.floating {
+  position: absolute;
+  top: -0.7em;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-1);
+  z-index: 2;
+}
+
 /* ---------- Slide 4: Linear Algebra Review → 101 scratch-out ---------- */
 .linalg-review {
   text-align: center;
@@ -711,6 +741,7 @@
   padding: 0.4em 0.6em;
   border-left: 2px solid var(--cyan);
   border-right: 2px solid var(--cyan);
+  position: relative;
 }
 #matmul-explainer .mmx-row {
   display: grid;
@@ -910,6 +941,7 @@
   background: rgba(91,233,185,0.04);
   border: 1px solid rgba(91,233,185,0.2);
   border-radius: 8px; padding: 6px;
+  position: relative;
 }
 #toy-transformer .tt-mat-row {
   display: flex; gap: 4px;

@@ -1,7 +1,7 @@
 {
   "routes": [
     { "route": "/", "rewrite": "/index.html" },
-    { "route": "/presentation", "rewrite": "/presentation.html" },
+    { "route": "/presentation", "rewrite": "/watch.html" },
     { "route": "/presentation/*", "rewrite": "/presentation.html" }
   ],
   "navigationFallback": {

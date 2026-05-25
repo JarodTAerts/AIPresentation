@@ -142,7 +142,7 @@ function renderMatmul() {
           <div class="mmx-vcells-row">${MM_V.map((v, i) => `<span class="mmx-vcell" data-i="${i}">${v}</span>`).join('')}</div>
         </div>
         <div class="mmx-times">×</div>
-        <div class="mmx-mat" id="mmx-mat">
+        <div class="mmx-mat" id="mmx-mat"><span class="model-tag floating">Model</span>
           ${MM_M.map((row, r) => `
             <div class="mmx-row" data-row="${r}">
               ${row.map((v, c) => `<span class="mmx-cell" data-r="${r}" data-c="${c}">${mmFmt(v)}</span>`).join('')}
@@ -291,7 +291,7 @@ function renderMoodMixer() {
           </div>`).join('')}
       </div>
       <div class="mm-col mm-weights">
-        <h4>Weight matrix</h4>
+        <h4>Weight matrix <span class="model-tag">Model</span></h4>
         <table class="mm-matrix">
           <thead><tr><th></th>${MOOD_LABELS_IN.map(l => `<th>${l}</th>`).join('')}</tr></thead>
           <tbody>
@@ -540,6 +540,7 @@ function buildToyEqHTML(prev, W, result, highlight) {
       </div>
       <div class="tt-op">×</div>
       <div class="tt-mat tt-mat-cols">
+        <span class="model-tag floating">Model</span>
         <div class="tt-mat-row">
           <span class="tt-cell tt-mt ${c0Hot ? 'tt-col-hot' : ''}">${a}</span>
           <span class="tt-cell tt-mt ${c1Hot ? 'tt-col-hot' : ''}">${b}</span>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch · Generative AI — Good Vibes and the Bad</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-0:        #06080F;
+      --bg-1:        #0B0F1A;
+      --bg-2:        #11172A;
+      --bg-3:        #18213A;
+      --line:        #243049;
+      --ink:         #E6EDF3;
+      --ink-soft:    #B6C0CE;
+      --muted:       #7D8AA0;
+      --phosphor:    #5BE9B9;
+      --phosphor-d:  #2FBF94;
+      --cyan:        #7AD9E5;
+      --amber:       #F2B65A;
+      --rose:        #F08A8A;
+      --violet:      #B597F0;
+      --mono:        'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      --sans:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg-1); color: var(--ink); }
+    body {
+      font-family: var(--sans);
+      line-height: 1.55;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 800px at 85% -10%, rgba(91,233,185,0.10), transparent 60%),
+        radial-gradient(1000px 700px at -10% 110%, rgba(122,217,229,0.08), transparent 55%),
+        radial-gradient(700px 500px at 50% 120%, rgba(242,182,90,0.05), transparent 60%),
+        var(--bg-1);
+    }
+    h1, h2, h3 { font-family: var(--sans); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+    a { color: var(--phosphor); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    main { max-width: 1640px; margin: 0 auto; padding: 1.4rem 1.5rem 3rem; }
+
+    .watch-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.6em; margin: 0.5rem 0 1.2rem;
+    }
+    .watch-header h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+    .watch-header h1 .good { color: var(--phosphor); }
+    .watch-header h1 .bad  { color: var(--amber); }
+    .watch-header h1 .conj { color: var(--muted); font-weight: 400; }
+    .watch-header h1 .dim  { color: var(--ink-soft); font-weight: 500; }
+    .watch-header .sub { color: var(--ink-soft); font-size: 0.95rem; margin-top: 0.3em; }
+
+    .home-link {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .home-link:hover { color: var(--phosphor); }
+
+    .watch-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 1.2rem;
+      align-items: stretch;
+    }
+    .watch-pane {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .pane-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.7em 1em; border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .pane-title {
+      font-weight: 600; font-size: 0.95rem; color: var(--ink);
+      display: inline-flex; align-items: center; gap: 0.5em;
+    }
+    .pane-action {
+      font-size: 0.78rem; font-weight: 600;
+      padding: 0.35em 0.85em; border-radius: 999px;
+      background: rgba(91,233,185,0.08); color: var(--phosphor);
+      border: 1px solid rgba(91,233,185,0.22);
+      transition: background .15s, border-color .15s;
+      font-family: var(--mono);
+    }
+    .pane-action:hover { background: rgba(91,233,185,0.16); text-decoration: none; }
+
+    /* Slides preview pane — render iframe at fixed 1280x720, scale to fit. */
+    .deck.watch-pane .frame-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 420px;
+      background: var(--bg-1);
+      overflow: hidden;
+    }
+    .deck-scaler {
+      position: absolute; top: 0; left: 0;
+      width: 1280px; height: 720px;
+      transform-origin: top left;
+      will-change: transform;
+    }
+    .deck-scaler iframe {
+      width: 1280px; height: 720px; border: 0; display: block;
+    }
+
+    /* Video pane — normal responsive iframe. */
+    .frame-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 420px;
+      background: #000;
+    }
+    .frame-wrap > iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; border: 0;
+      display: block;
+    }
+
+    @media (max-width: 1100px) {
+      .watch-grid { grid-template-columns: 1fr; }
+      .frame-wrap { min-height: 0; padding-bottom: 56.25%; }
+    }
+
+    .pane-footer {
+      display: flex; justify-content: center;
+      padding: 0.75em 1em;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .btn-open-slides {
+      display: inline-flex; align-items: center; gap: 0.5em;
+      padding: 0.6em 1.4em; border-radius: 999px;
+      background: var(--phosphor); color: var(--bg-0);
+      font-weight: 600; font-size: 0.9rem;
+      border: 1px solid var(--phosphor);
+      box-shadow: 0 6px 20px rgba(91,233,185,0.22);
+      transition: background .15s, transform .1s, box-shadow .2s;
+    }
+    .btn-open-slides:hover { background: var(--phosphor-d); text-decoration: none; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(91,233,185,0.38); }
+    .btn-open-slides .arrow { font-size: 1em; }
+
+    .stream-offline {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 3rem 1.5rem; text-align: center;
+      color: var(--muted); font-size: 0.95rem;
+      height: 100%;
+    }
+    .stream-offline .icon { font-size: 2.5rem; margin-bottom: 0.6em; }
+    .stream-offline strong { color: var(--ink-soft); }
+
+    h2.section-heading {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.6rem;
+      margin: 3rem 0 1.2em;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1em;
+    }
+    .topic-card {
+      position: relative;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.3em 1.4em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+      overflow: hidden;
+    }
+    .topic-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--phosphor);
+    }
+    .topic-card.cyan::before   { background: var(--cyan); }
+    .topic-card.amber::before  { background: var(--amber); }
+    .topic-card.rose::before   { background: var(--rose); }
+    .topic-card.violet::before { background: var(--violet); }
+    .topic-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.5); border-color: rgba(91,233,185,0.4); }
+    .topic-card .icon { font-size: 1.6rem; line-height: 1; margin-bottom: 0.5em; }
+    .topic-card h3 {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 0 0 0.4em;
+      color: var(--ink);
+    }
+    .topic-card p { margin: 0; color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; }
+
+    footer {
+      max-width: 1640px; margin: 0 auto;
+      color: var(--muted); font-size: 0.78rem; text-align: center;
+      padding: 1.5rem 1.5rem 2rem;
+    }
+    footer a { color: var(--phosphor); }
+  </style>
+</head>
+<body>
+
+<main>
+  <header class="watch-header">
+    <div>
+      <h1>
+        <span class="dim">Generative AI:</span>
+        the <span class="good">good vibes</span> <span class="conj">and the</span> <span class="bad">bad</span>
+      </h1>
+      <div class="sub">Watch the presentation and follow along with the slides.</div>
+    </div>
+    <a class="home-link" href="/">← Home</a>
+  </header>
+
+  <div class="watch-grid">
+    <!-- Left: deck preview -->
+    <div class="watch-pane deck">
+      <div class="pane-header">
+        <span class="pane-title">🎞 Slides</span>
+      </div>
+      <div class="frame-wrap" id="deckFrameWrap">
+        <div class="deck-scaler" id="deckScaler">
+          <iframe
+            src="/presentation/1"
+            title="Generative AI presentation slides"
+            allow="fullscreen"
+            allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="pane-footer">
+        <a class="btn-open-slides" href="/presentation/1" target="_blank" rel="noopener">
+          Open Full Slides <span class="arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: video -->
+    <div class="watch-pane">
+      <div class="pane-header">
+        <span class="pane-title">📺 Video</span>
+        <a class="pane-action" id="ytLink" href="#" target="_blank" rel="noopener" hidden>
+          Watch on YouTube ↗
+        </a>
+      </div>
+      <div class="frame-wrap" id="videoFrame">
+        <div class="stream-offline" id="streamOffline">
+          <div class="icon">📺</div>
+          <div><strong>Stream not configured yet</strong></div>
+          <div style="margin-top: 0.6em; max-width: 380px;">
+            Once the live stream is set up, the video will appear here. The slides on the left are fully usable right now.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">What you'll see</h2>
+  <div class="topic-grid">
+    <div class="topic-card">
+      <div class="icon">🧮</div>
+      <h3>The math, plainly</h3>
+      <p>Linear algebra without the algebra. A 3×3 mixer you can drag. A toy transformer that actually spells a word.</p>
+    </div>
+    <div class="topic-card cyan">
+      <div class="icon">🏗️</div>
+      <h3>What's inside a modern AI</h3>
+      <p>Hover over each piece of a real architecture diagram — safety filters, tool use, retrieval, the model core, and more.</p>
+    </div>
+    <div class="topic-card amber">
+      <div class="icon">💻</div>
+      <h3>AI &amp; code</h3>
+      <p>How "vibe-coding" works, why models pass software-engineering benchmarks now, and the honest caveats.</p>
+    </div>
+    <div class="topic-card violet">
+      <div class="icon">🔌</div>
+      <h3>The new plumbing</h3>
+      <p>MCP servers and "Skills" — the duct tape connecting models to the rest of the software you use.</p>
+    </div>
+    <div class="topic-card rose">
+      <div class="icon">⚖️</div>
+      <h3>Costs &amp; trade-offs</h3>
+      <p>Datacenter energy, hardware shortages, wealth concentration, and the entry-level jobs being hollowed out.</p>
+    </div>
+    <div class="topic-card">
+      <div class="icon">🔭</div>
+      <h3>Where it's going</h3>
+      <p>Three plausible 5-year scenarios — without hype and without doom.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Tip: open the slides full-screen for the best view, or scrub them yourself while you watch.
+</footer>
+
+<script>
+  /* ===========================================================
+   * VIDEO CONFIG — set ONE of these to point the embed at your
+   * livestream or recording. Leave both null to show the offline
+   * placeholder.
+   *
+   *   videoId : a specific YouTube video ID (e.g. "dQw4w9WgXcQ")
+   *             → uses https://www.youtube.com/embed/{videoId}
+   *   channel : YouTube channel ID for "currently live on this
+   *             channel" embed
+   *             → uses https://www.youtube.com/embed/live_stream?channel={channel}
+   *
+   * Both also accept ?autoplay=1, ?mute=1 etc. by setting `params`.
+   * =========================================================== */
+  const VIDEO_CONFIG = {
+    videoId: null,             // <-- paste your YouTube live/video ID here when ready
+    channel: null,
+    params:  'rel=0&modestbranding=1',
+    isLive:  true,
+  };
+
+  (function () {
+    const frame   = document.getElementById('videoFrame');
+    const offline = document.getElementById('streamOffline');
+    const ytLink  = document.getElementById('ytLink');
+    let embedSrc  = null;
+    let watchUrl  = null;
+
+    if (VIDEO_CONFIG.videoId) {
+      embedSrc = `https://www.youtube.com/embed/${VIDEO_CONFIG.videoId}?${VIDEO_CONFIG.params || ''}`;
+      watchUrl = `https://www.youtube.com/watch?v=${VIDEO_CONFIG.videoId}`;
+    } else if (VIDEO_CONFIG.channel) {
+      embedSrc = `https://www.youtube.com/embed/live_stream?channel=${VIDEO_CONFIG.channel}&${VIDEO_CONFIG.params || ''}`;
+      watchUrl = `https://www.youtube.com/channel/${VIDEO_CONFIG.channel}/live`;
+    }
+
+    if (embedSrc) {
+      offline.remove();
+      const iframe = document.createElement('iframe');
+      iframe.src = embedSrc;
+      iframe.title = 'YouTube video player';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      frame.appendChild(iframe);
+      ytLink.href = watchUrl;
+      ytLink.hidden = false;
+    }
+  })();
+
+  /* Slides preview: render iframe at fixed 1280x720 and scale to fit pane. */
+  (function () {
+    const wrap   = document.getElementById('deckFrameWrap');
+    const scaler = document.getElementById('deckScaler');
+    if (!wrap || !scaler) return;
+
+    const BASE_W = 1280, BASE_H = 720;
+
+    function fit() {
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      if (!w || !h) return;
+      const s = Math.min(w / BASE_W, h / BASE_H);
+      const tx = Math.max(0, (w - BASE_W * s) / 2);
+      const ty = Math.max(0, (h - BASE_H * s) / 2);
+      scaler.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+    }
+
+    const ro = new ResizeObserver(fit);
+    ro.observe(wrap);
+    window.addEventListener('resize', fit);
+    fit();
+  })();
+</script>
+
+</body>
+</html>

@@ -35,8 +35,12 @@ class SWAHandler(http.server.SimpleHTTPRequestHandler):
         # Normalize
         url_path = posixpath.normpath(url_path)
 
-        # /presentation or /presentation/* -> /presentation.html
-        if url_path == "/presentation" or url_path.startswith("/presentation/"):
+        # /presentation (bare) -> /watch.html  (slides preview + livestream embed)
+        if url_path == "/presentation":
+            return "/watch.html"
+
+        # /presentation/* -> /presentation.html  (actual slide deck, deep-linkable)
+        if url_path.startswith("/presentation/"):
             return "/presentation.html"
 
         # Bare root or directory -> index.html (default behavior already, but explicit)
