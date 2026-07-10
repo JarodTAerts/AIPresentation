@@ -1037,16 +1037,16 @@ function renderEnergy() {
       <div class="stat"><div class="stat-label">≈ U.S. homes powered for a day</div><div class="stat-value amber" id="en-homes">—</div></div>
       <div class="stat"><div class="stat-label">CO₂ / day (US grid avg)</div><div class="stat-value rose" id="en-co2">—</div></div>
     </div>
-    <p class="small muted mt-2">Per query: ~3 Wh (Epoch AI 2025 mid-estimate). U.S. home avg: 30 kWh/day. Grid avg: 0.37 kg CO₂/kWh.</p>`;
+    <p class="small muted mt-2">Per query: ~0.3 Wh (Epoch AI 2025 — typical GPT-4o; long-context or reasoning can exceed 5–40 Wh). U.S. home avg: 30 kWh/day. Grid avg: 0.35 kg CO₂/kWh (EPA eGRID 2023).</p>`;
   computeEnergy();
 }
 function computeEnergy() {
   const root = document.getElementById('energy-widget'); if (!root) return;
   const m = parseFloat(document.getElementById('en-tokens').value) || 0;
   document.getElementById('en-val').textContent = m.toLocaleString();
-  const kwhPerDay = (m * 1e6) * 0.003;                  // 3 Wh/query
+  const kwhPerDay = (m * 1e6) * 0.0003;                 // 0.3 Wh/query
   const homes = kwhPerDay / 30;
-  const co2 = kwhPerDay * 0.37;
+  const co2 = kwhPerDay * 0.35;
   document.getElementById('en-kwh').textContent  = fmtSI(kwhPerDay) + ' kWh';
   document.getElementById('en-homes').textContent = fmtSI(homes);
   document.getElementById('en-co2').textContent  = fmtSI(co2) + ' kg';
