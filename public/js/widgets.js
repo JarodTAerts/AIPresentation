@@ -9,6 +9,11 @@
      - applyChartDefaults(): set Chart.js global defaults for dark theme
    ============================================================= */
 
+if (!window.CLAIM_DATA) {
+  throw new Error('claim-data.js must load before widgets.js');
+}
+const CLAIMS = window.CLAIM_DATA;
+
 // ---------- Chart.js dark-theme defaults ----------
 function applyChartDefaults() {
   if (typeof Chart === 'undefined') return;
@@ -25,6 +30,29 @@ function applyChartDefaults() {
 
 // Chart handles kept here so we can resize on slide change.
 const CHARTS = {};
+let PRESENTATION_ANIMATIONS_PAUSED = false;
+
+function setPresentationAnimationsPaused(paused) {
+  PRESENTATION_ANIMATIONS_PAUSED = Boolean(paused);
+  if (PRESENTATION_ANIMATIONS_PAUSED) {
+    if (window._matrixCycler) {
+      clearInterval(window._matrixCycler);
+      window._matrixCycler = null;
+    }
+    stopZoomOut();
+    stopAgentLoopAnim();
+    stopToolTypingAnim();
+    stopMcpAutoCycle();
+    stopWealthAutoCycle();
+    const slide = document.querySelector('.reveal .slides > section.present');
+    if (slide && slide.querySelector('#zoom-canvas')) renderZoomStatic();
+    if (slide && slide.querySelector('.agent-loop')) showAgentLoopStatic();
+  } else {
+    const slide = document.querySelector('.reveal .slides > section.present');
+    spawnMatrixBackdrop();
+    if (slide) onSlideChange({ currentSlide: slide, previousSlide: null });
+  }
+}
 
 // ============================================================
 //  Slide 1 — Title slide: drifting matrix-multiply backdrop
@@ -159,9 +187,9 @@ function renderMatmul() {
         <div class="mmx-step-title">Click <strong>Next step</strong> to compute the first output.</div>
       </div>
 
-      <div class="controls-actions mt-2">
-        <button class="btn" id="mmx-next" data-step-btn>Next step →</button>
-        <button class="btn ghost" id="mmx-reset">Reset</button>
+      <div class="controls-actions mt-1">
+        <button class="btn" id="mmx-next" type="button" data-step-btn>Next step →</button>
+        <button class="btn ghost" id="mmx-reset" type="button">Reset</button>
       </div>
     </div>`;
 }
@@ -193,7 +221,18 @@ function mmxRefresh() {
     const ACTIONS = ['eat something', 'go to sleep', 'go chat with a neighbor'];
     explain.innerHTML = `
       <div class="mmx-step-title done">Done — Travis will most likely <strong>${ACTIONS[bestIdx]}</strong> next.</div>
-      <div class="mmx-step-body">"${MM_LBL_OUT[bestIdx]}" scored highest (${finalOuts[bestIdx].toFixed(2)}). Each output is a <strong>weighted sum</strong> of all of Travis's needs — the matrix rows are the "recipes." Real neural networks do exactly this, just with millions of weights instead of nine.</div>`;
+      <div class="mmx-step-body">"${MM_LBL_OUT[bestIdx]}" scored highest (${finalOuts[bestIdx].toFixed(2)}). Each output is a <strong>weighted sum</strong> of all of Travis's needs — one ingredient that larger neural networks repeat across billions of learned weights.</div>`;
+    return;
+  }
+
+  if (r < 0) {
+    explain.innerHTML = `
+      <div class="mmx-step-title">Ready · 0 of 9 multiply-and-add terms</div>
+      <div class="mmx-step-body">Each click pairs one need with one weight. Three terms make one action score; three rows make all three scores.</div>`;
+    if (nextBtn) {
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Start · 0 / 9 →';
+    }
     return;
   }
 
@@ -228,7 +267,11 @@ function mmxRefresh() {
       <span class="mmx-formula">${terms.join(' + ')} = <strong>${partial.toFixed(2)}</strong></span>
     </div>
     <div class="mmx-step-hint small muted">Multiply each input by the matching weight in this row, then add them up.</div>`;
-  if (nextBtn) nextBtn.disabled = false;
+  if (nextBtn) {
+    nextBtn.disabled = false;
+    const completedTerms = s * MM_V.length + Math.max(0, r + 1);
+    nextBtn.textContent = `Next step · ${Math.min(completedTerms, 9)} / 9 →`;
+  }
 }
 
 function mmRowDot(v, M, row) {
@@ -247,6 +290,12 @@ function mmFmt(v) {
 
 function mmxNext() {
   MM_STATE.row++;
+  if (MM_STATE.step === MM_M.length - 1 && MM_STATE.row === MM_V.length - 1) {
+    MM_STATE.step = MM_M.length;
+    MM_STATE.row = 0;
+    mmxRefresh();
+    return;
+  }
   if (MM_STATE.row >= MM_V.length) { MM_STATE.row = 0; MM_STATE.step++; }
   if (MM_STATE.step > MM_M.length) { MM_STATE.step = MM_M.length; MM_STATE.row = 0; }
   mmxRefresh();
@@ -287,7 +336,7 @@ function renderMoodMixer() {
         ${MOOD_LABELS_IN.map((label, i) => `
           <div class="field mm-field">
             <label>${label} <span class="val" id="mm-in-val-${i}">${MOOD_DEFAULTS.inputs[i]}</span></label>
-            <input type="range" id="mm-in-${i}" min="0" max="10" step="1" value="${MOOD_DEFAULTS.inputs[i]}">
+            <input type="range" id="mm-in-${i}" min="0" max="10" step="1" value="${MOOD_DEFAULTS.inputs[i]}" aria-label="${label}">
           </div>`).join('')}
       </div>
       <div class="mm-col mm-weights">
@@ -299,7 +348,7 @@ function renderMoodMixer() {
               <tr data-row="${r}">
                 <th>${rl}</th>
                 ${MOOD_DEFAULTS.weights[r].map((v, c) => `
-                  <td><input type="number" id="mm-w-${r}-${c}" step="0.1" value="${v}"></td>
+                  <td><input type="number" id="mm-w-${r}-${c}" step="0.1" value="${v}" aria-label="${rl} weight for ${MOOD_LABELS_IN[c]}"></td>
                 `).join('')}
               </tr>`).join('')}
           </tbody>
@@ -313,13 +362,13 @@ function renderMoodMixer() {
         <h4>Outputs</h4>
         <div class="mm-out-grid">
         ${MOOD_LABELS_OUT.map((label, i) => `
-          <div class="mm-out-row" id="mm-out-row-${i}">
+          <div class="mm-out-row" id="mm-out-row-${i}" tabindex="0" role="group" aria-label="${label} output and matching weight row">
             <div class="mm-out-label">${label}</div>
             <div class="mm-bar-wrap"><div class="mm-bar" id="mm-bar-${i}"></div></div>
             <div class="mm-out-val" id="mm-out-val-${i}">0.00</div>
           </div>`).join('')}
         </div>
-        <p class="small muted mt-2" id="mm-verdict">Adjust the sliders to see Travis's next action.</p>
+        <p class="small muted mt-2" id="mm-verdict" aria-live="polite">Adjust the sliders to see Travis's next action.</p>
         <p class="small muted mt-1" style="opacity:0.7;">→ Hover an output name to highlight its row in the weight matrix.</p>
       </div>
     </div>`;
@@ -331,6 +380,8 @@ function renderMoodMixer() {
     if (!row) return;
     row.addEventListener('mouseenter', () => highlightMoodRow(r, true));
     row.addEventListener('mouseleave', () => highlightMoodRow(r, false));
+    row.addEventListener('focus', () => highlightMoodRow(r, true));
+    row.addEventListener('blur', () => highlightMoodRow(r, false));
   });
 
   computeMood();
@@ -400,278 +451,380 @@ function wireMoodMixer() {
 }
 
 // ============================================================
-//  Slide 6 — Toy Transformer that spells "CAT"
+//  Slide 6 — A genuine tiny decoder-only transformer
 // ============================================================
-// 4 tokens on the unit circle as 2D embeddings:
-//   START = (1, 0)        C = (0, 1)        A = (-1, 0)        T = (0, -1)
-// The "next-token" weights W (4×2) are the same vectors as rows.
-// At each step, score each token by dot(state, token_emb); softmax → pick max.
-// Hand-traced so the sequence START → C → A → T plays out cleanly.
+// This one-layer, one-head model was trained on two examples:
+//   C A -> T
+//   B A -> D
+// Because the latest token is A in both examples, the model must use causal
+// self-attention to recover the first token. d_model=2 keeps every learned
+// projection in the attention and MLP blocks at 2x2. The vocabulary embedding
+// table is 5x2 and is tied to the output head.
 
-const TOY_TOKENS = ['START', 'C', 'A', 'T'];
-const TOY_EMB = {
-  START: [ 1,  0],
-  C:     [ 0,  1],
-  A:     [-1,  0],
-  T:     [ 0, -1],
+const TT_TOKENS = ['C', 'B', 'A', 'T', 'D'];
+const TT_MODEL = {
+  positions: [[-0.215026, 0.574745], [-0.530145, -0.153110]],
+  embeddings: [
+    [ 0.073817, -1.144056],
+    [ 0.541539, -0.998126],
+    [ 0.622092,  1.542051],
+    [-1.621297, -1.704078],
+    [-1.147852,  2.913131],
+  ],
+  norm1: [1.592385, 1.197431],
+  q: [[ 0.970285,  0.940455], [-0.446786, -0.744309]],
+  k: [[-0.819539, -0.377791], [-0.220349,  0.928223]],
+  v: [[ 0.023177, -0.102654], [-1.029031, -0.546534]],
+  o: [[-0.202278, -0.396141], [-0.203585, -0.754599]],
+  norm2: [0.879187, 1.334419],
+  ff1: [[-0.432111, 0.581963], [-0.234796, 0.464147]],
+  ff2: [[-0.729627, -1.432304], [-0.843985, -0.430868]],
 };
-// A simple "rotate 90° clockwise" state-update so that:
-//   state=START(1,0)   → rotate → (0,1)=C
-//   state=C(0,1)       → rotate → (-1,0)=A     (actually rotate 90° CCW for that)
-// We want a single, simple update; use: nextState = R · state where R rotates by -90° (clockwise).
-//   R = [[0, 1], [-1, 0]]
-// Trace:
-//   START (1,0)  → R·s = (0, -1) = T  ❌
-// Use CCW rotation: R = [[0, -1], [1, 0]]
-//   (1,0) → (0,1) = C ✓
-//   (0,1) → (-1,0) = A ✓
-//   (-1,0) → (0,-1) = T ✓
-// Row-vector convention: new_state = state · W   (state is 1×2 row, W is 2×2)
-// This matches how real models think of it: the input flows IN on the left,
-// the weight matrix is on the right.  W is the transpose of the column-form R.
-//   [1,0] · W = [0,1] = C  → W row 0 = [0, 1]
-//   [0,1] · W = [-1,0] = A → W row 1 = [-1, 0]
-const TOY_W = [[0, 1], [-1, 0]];
+const TT_STATE = { prefix: 'CA', phase: 0 };
 
-function toyRowMatVec(v, M) {
-  // Row-vector × matrix.  out[j] = sum_i v[i] * M[i][j].
-  return [v[0]*M[0][0] + v[1]*M[1][0], v[0]*M[0][1] + v[1]*M[1][1]];
+function ttDot(a, b) {
+  return a.reduce((sum, value, i) => sum + value * b[i], 0);
 }
-function toyDot(a, b) { return a[0]*b[0] + a[1]*b[1]; }
-function toySoftmax(scores) {
-  const m = Math.max(...scores);
-  const exps = scores.map(s => Math.exp(s - m));
-  const sum = exps.reduce((a, b) => a + b, 0);
-  return exps.map(e => e / sum);
+function ttLinear(vector, weights) {
+  return weights.map(row => ttDot(vector, row));
 }
-
-const TOY_STATE = { step: 0, history: ['START'], state: TOY_EMB.START.slice() };
+function ttAdd(a, b) {
+  return a.map((value, i) => value + b[i]);
+}
+function ttRmsNorm(vector, scale) {
+  const rms = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0) / vector.length + 1e-5);
+  return vector.map((value, i) => (value / rms) * scale[i]);
+}
+function ttGelu(value) {
+  return 0.5 * value * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (value + 0.044715 * value * value * value)));
+}
+function ttSoftmax(values) {
+  const max = Math.max(...values);
+  const exps = values.map(value => Math.exp(value - max));
+  const sum = exps.reduce((acc, value) => acc + value, 0);
+  return exps.map(value => value / sum);
+}
+function ttRun(prefix) {
+  const ids = prefix === 'CA' ? [0, 2] : [1, 2];
+  const labels = prefix.split('');
+  const tokenEmbeddings = ids.map(id => TT_MODEL.embeddings[id]);
+  const positionEmbeddings = ids.map((_, i) => TT_MODEL.positions[i]);
+  const x = tokenEmbeddings.map((embedding, i) => ttAdd(embedding, positionEmbeddings[i]));
+  const normalized = x.map(row => ttRmsNorm(row, TT_MODEL.norm1));
+  const q = normalized.map(row => ttLinear(row, TT_MODEL.q));
+  const k = normalized.map(row => ttLinear(row, TT_MODEL.k));
+  const v = normalized.map(row => ttLinear(row, TT_MODEL.v));
+  const scores = q.map((query, row) => k.map((key, col) => col > row ? -Infinity : ttDot(query, key) / Math.sqrt(2)));
+  const attention = scores.map(ttSoftmax);
+  const mixed = attention.map(weights => {
+    return [0, 1].map(dim => weights.reduce((sum, weight, token) => sum + weight * v[token][dim], 0));
+  });
+  const attentionUpdates = mixed.map(row => ttLinear(row, TT_MODEL.o));
+  const afterAttention = x.map((row, i) => ttAdd(row, attentionUpdates[i]));
+  const mlpUpdates = afterAttention.map(row => {
+    const hidden = ttLinear(ttRmsNorm(row, TT_MODEL.norm2), TT_MODEL.ff1).map(ttGelu);
+    return ttLinear(hidden, TT_MODEL.ff2);
+  });
+  const afterMlp = afterAttention.map((row, i) => ttAdd(row, mlpUpdates[i]));
+  const logits = TT_MODEL.embeddings.map(embedding => ttDot(afterMlp[1], embedding));
+  const probabilities = ttSoftmax(logits);
+  return {
+    ids,
+    labels,
+    tokenEmbeddings,
+    positionEmbeddings,
+    x,
+    q,
+    k,
+    v,
+    scores,
+    attention,
+    mixed,
+    attentionUpdates,
+    afterAttention,
+    mlpUpdates,
+    afterMlp,
+    logits,
+    probabilities,
+  };
+}
+function ttFmt(value, digits = 2) {
+  if (!Number.isFinite(value)) return '−∞';
+  const rounded = Math.abs(value) < 0.005 ? 0 : value;
+  return rounded.toFixed(digits).replace('-', '−');
+}
+function ttMatrixHtml(matrix, rowLabels, colLabels, mode) {
+  return `
+    <div class="tt-table ${mode || ''}">
+      <div class="tt-corner"></div>
+      ${colLabels.map(label => `<div class="tt-axis-label">${label}</div>`).join('')}
+      ${matrix.map((row, r) => `
+        <div class="tt-axis-label row">${rowLabels[r]}</div>
+        ${row.map((value, c) => {
+          const masked = !Number.isFinite(value);
+          const hot = r === 1 && c === 0 && mode === 'weights';
+          return `<div class="tt-number ${masked ? 'masked' : ''} ${hot ? 'hot' : ''}">${mode === 'weights' && !masked ? Math.round(value * 100) + '%' : ttFmt(value)}</div>`;
+        }).join('')}
+      `).join('')}
+    </div>`;
+}
+function ttVectorMatrixHtml(matrix, labels) {
+  return `
+    <div class="tt-table vectors">
+      <div class="tt-corner"></div><div class="tt-axis-label">dim 1</div><div class="tt-axis-label">dim 2</div>
+      ${matrix.map((row, r) => `
+        <div class="tt-axis-label row">${labels[r]}</div>
+        ${row.map(value => `<div class="tt-number">${ttFmt(value)}</div>`).join('')}
+      `).join('')}
+    </div>`;
+}
+function ttVectorHtml(vector) {
+  return `<span class="tt-inline-vector">[${vector.map(value => ttFmt(value)).join(', ') }]</span>`;
+}
+function ttEmbeddingHtml(result) {
+  return `
+    <div class="tt-embed-intro"><strong>Embedding = learned lookup.</strong> A token selects one row from a table of vectors; position adds where it appeared.</div>
+    <div class="tt-embed-grid">
+      <div class="tt-embed-heading">token</div>
+      <div class="tt-embed-heading">learned token vector</div>
+      <div></div>
+      <div class="tt-embed-heading">learned position vector</div>
+      <div></div>
+      <div class="tt-embed-heading">input vector</div>
+      ${result.labels.map((label, i) => `
+        <div class="tt-embed-token">${label}</div>
+        ${ttVectorHtml(result.tokenEmbeddings[i])}
+        <div class="tt-eq-symbol">+</div>
+        <div class="tt-position-vector"><span>P${i + 1}</span>${ttVectorHtml(result.positionEmbeddings[i])}</div>
+        <div class="tt-eq-symbol">=</div>
+        ${ttVectorHtml(result.x[i])}
+      `).join('')}
+    </div>`;
+}
+function ttQueryKeyScoreHtml(result) {
+  const queryA = result.q[1];
+  const comparisons = [
+    { keyLabel: result.labels[0], key: result.k[0], score: result.scores[1][0] },
+    { keyLabel: result.labels[1], key: result.k[1], score: result.scores[1][1] },
+  ];
+  return `
+    ${ttMatrixHtml(result.scores, result.labels, result.labels, 'scores')}
+    <div class="tt-qk-examples">
+      <div class="tt-qk-query"><span>Current query</span><strong>Q(${result.labels[1]})</strong>${ttVectorHtml(queryA)}</div>
+      ${comparisons.map(item => `
+        <div class="tt-key-row">
+          <strong>K(${item.keyLabel})</strong>
+          ${ttVectorHtml(item.key)}
+          <em>dot ÷ √2</em>
+          <strong>= ${ttFmt(item.score)}</strong>
+        </div>
+      `).join('')}
+    </div>
+    <p class="tt-caption">Rows are queries; columns are keys. The <span class="tt-mask-word">mask</span> blocks C from looking ahead to A.</p>`;
+}
+function ttContextHtml(result) {
+  const last = 1;
+  const weights = result.attention[last];
+  return `
+    <div class="tt-context-flow">
+      <div class="tt-context-line">
+        <span>Attention mix</span>
+        <strong>${Math.round(weights[0] * 1000) / 10}% V(${result.labels[0]}) + ${Math.round(weights[1] * 1000) / 10}% V(A)</strong>
+        ${ttVectorHtml(result.mixed[last])}
+      </div>
+      <div class="tt-context-line">
+        <span>2×2 output projection</span>
+        <strong>turns the mix into an update</strong>
+        ${ttVectorHtml(result.attentionUpdates[last])}
+      </div>
+    </div>
+    <div class="tt-residual-equation">
+      <div><span>original A</span>${ttVectorHtml(result.x[last])}</div>
+      <b>+</b>
+      <div><span>context update</span>${ttVectorHtml(result.attentionUpdates[last])}</div>
+      <b>=</b>
+      <div class="result"><span>contextual A</span>${ttVectorHtml(result.afterAttention[last])}</div>
+    </div>
+    <p class="tt-caption"><strong>Residual connection:</strong> keep A's original state and add the information attention retrieved.</p>`;
+}
+function ttPredictionHtml(result, target, other) {
+  const finalState = result.afterMlp[1];
+  const targetIndex = TT_TOKENS.indexOf(target);
+  const otherIndex = TT_TOKENS.indexOf(other);
+  const candidateRow = index => {
+    const vector = TT_MODEL.embeddings[index];
+    const score = result.logits[index];
+    return `
+      <div class="tt-score-row ${index === targetIndex ? 'winner' : ''}">
+        <span class="tt-score-token">${TT_TOKENS[index]}</span>
+        ${ttVectorHtml(vector)}
+        <span class="tt-dot">· final =</span>
+        <strong>${ttFmt(score)}</strong>
+      </div>`;
+  };
+  return `
+    <div class="tt-residual-equation compact">
+      <div><span>contextual A</span>${ttVectorHtml(result.afterAttention[1])}</div>
+      <b>+</b>
+      <div><span>MLP update</span>${ttVectorHtml(result.mlpUpdates[1])}</div>
+      <b>=</b>
+      <div class="result"><span>final state</span>${ttVectorHtml(finalState)}</div>
+    </div>
+    <div class="tt-score-explain">The output head asks: <strong>which token vector best aligns with that final state?</strong></div>
+    <div class="tt-score-grid">
+      ${candidateRow(targetIndex)}
+      ${candidateRow(otherIndex)}
+    </div>
+    <p class="tt-caption">${ttVectorHtml(finalState)} · ${ttVectorHtml(TT_MODEL.embeddings[targetIndex])} = <strong>${ttFmt(result.logits[targetIndex])}</strong>. Softmax converts all five token scores into probabilities, so <strong>${target}</strong> wins.</p>`;
+}
 
 function renderToyTransformer() {
   const root = document.getElementById('toy-transformer');
   if (!root || root.dataset.built) return;
   root.dataset.built = '1';
-
   root.innerHTML = `
-    <div class="tt-grid">
-      <div class="tt-col tt-math-col">
-        <div class="tt-output">
-          <div class="tt-output-label">Output so far</div>
-          <div class="tt-output-text" id="tt-output">START</div>
+    <div class="tt-demo">
+      <div class="tt-stage">
+        <div class="tt-prefix-control" role="group" aria-label="Choose the two-token prefix">
+          <span class="tt-prefix-label">Try a prefix</span>
+          <button class="tt-prefix is-active" type="button" data-prefix="CA" aria-pressed="true"><span>C</span><span>A</span></button>
+          <button class="tt-prefix" type="button" data-prefix="BA" aria-pressed="false"><span>B</span><span>A</span></button>
         </div>
-
-        <div class="tt-eq" id="tt-eq">
-          <!-- The big matrix-multiplication display.  R · state = new
-               Each cell is a labelled tile so the math is readable from
-               the back of the room.  Built / refreshed in refreshToyTransformer. -->
+        <div class="tt-sequence" id="tt-sequence" aria-live="polite"></div>
+        <div class="tt-focus-card">
+          <div class="tt-focus-kicker" id="tt-focus-kicker">Ready</div>
+          <div id="tt-focus" aria-live="polite"></div>
         </div>
-
-        <div class="tt-explain" id="tt-explain">Press <strong>Predict next token</strong> to multiply the matrix.</div>
-
-        <div class="controls-actions mt-2">
-          <button class="btn" id="tt-step" data-step-btn>Predict next token →</button>
-          <button class="btn ghost" id="tt-reset">Reset</button>
+        <div class="controls-actions">
+          <button class="btn" id="tt-step" type="button" data-step-btn>Start with token vectors →</button>
+          <button class="btn ghost" id="tt-reset" type="button">Reset</button>
+          <span class="tt-step-count" id="tt-step-count">step 0 / 5</span>
         </div>
       </div>
-
-      <div class="tt-col tt-vis">
-        <div class="tt-circle-label">State vector lands closest to…</div>
-        <svg viewBox="-205 -180 410 360" class="tt-svg" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <marker id="tt-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
-              <path d="M0,0 L6,3 L0,6 z" fill="#5BE9B9"/>
-            </marker>
-          </defs>
-          <circle cx="0" cy="0" r="100" fill="none" stroke="#243049" stroke-width="1.5"/>
-          <line x1="-130" y1="0" x2="130" y2="0" stroke="#1B2236" stroke-width="0.8"/>
-          <line x1="0" y1="-130" x2="0" y2="130" stroke="#1B2236" stroke-width="0.8"/>
-          ${TOY_TOKENS.map(tok => {
-            const [x, y] = TOY_EMB[tok];
-            const X = x * 100, Y = -y * 100;
-            // Push each label well off the unit circle, anchored away from the dot.
-            const anchor = x > 0.5 ? 'start' : (x < -0.5 ? 'end' : 'middle');
-            const padX = x > 0.5 ? 18 : (x < -0.5 ? -18 : 0);
-            // When token sits on the top/bottom, push label far enough off the dot
-            // so both the name AND the coord-line fit clear of the circle.
-            const padY = y < -0.5 ? 30 : (y > 0.5 ? -34 : 0);
-            const lx = X + padX;
-            const ly = Y + padY;
-            const coordStr = `(${x}, ${y})`;
-            return `
-              <g class="tt-token" data-tok="${tok}">
-                <circle cx="${X}" cy="${Y}" r="8.5" fill="#11172A" stroke="#7AD9E5" stroke-width="2"/>
-                <text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="central"
-                      font-family="JetBrains Mono, monospace" font-size="16" fill="#E6EDF3" font-weight="600">${tok}</text>
-                <text x="${lx}" y="${ly + 18}" text-anchor="${anchor}" dominant-baseline="central"
-                      font-family="JetBrains Mono, monospace" font-size="11.5" fill="#8BA0B8">${coordStr}</text>
-              </g>`;
-          }).join('')}
-          <line id="tt-state-vec" x1="0" y1="0" x2="100" y2="0" stroke="#5BE9B9" stroke-width="4" marker-end="url(#tt-arrow)"/>
-        </svg>
+      <div class="tt-story">
+        <div class="tt-story-card">
+          <div class="tt-story-title">Why attention is necessary</div>
+          <p>In both examples the latest token is <code>A</code>. A last-token-only model sees the same input twice. Attention lets <code>A</code> retrieve the earlier letter.</p>
+        </div>
+        <div class="tt-pipeline" aria-label="Tiny transformer pipeline">
+          <span>embed tokens</span><span>score attention</span><span>mix context</span><span>residual + MLP</span><span>score tokens</span>
+        </div>
+        <div class="tt-result-card">
+          <div class="tt-story-title">Next-token probabilities</div>
+          <div id="tt-probabilities" class="tt-probabilities" aria-live="polite"></div>
+        </div>
+        <p class="tt-model-note">Five tokens · one layer · one attention head · 2D embeddings · tied output head · trained on <code>CA→T</code> and <code>BA→D</code></p>
       </div>
     </div>`;
-
   refreshToyTransformer();
 }
 
-function buildToyEqHTML(prev, W, result, highlight) {
-  // highlight: -1 = none, 0 = col 0 active, 1 = col 1 active, 2 = both
-  // Row-vector form:  [px py] · [[a b]   = [ px*a+py*c,  px*b+py*d ]
-  //                              [c d]]
-  const [a, b] = W[0], [c, d] = W[1];
-  const [px, py] = prev;
-  const c0Hot = highlight === 0 || highlight === 2;
-  const c1Hot = highlight === 1 || highlight === 2;
-  const stateHot = highlight !== -1;
-  const out0 = (result && result[0] !== null && result[0] !== undefined) ? result[0] : 0;
-  const out1 = (result && result[1] !== null && result[1] !== undefined) ? result[1] : 0;
-  return `
-    <div class="tt-eq-row">
-      <div class="tt-eq-label">state (input)</div>
-      <div class="tt-eq-label">×</div>
-      <div class="tt-eq-label">weights W</div>
-      <div class="tt-eq-label">=</div>
-      <div class="tt-eq-label">new state</div>
-    </div>
-    <div class="tt-eq-row tt-eq-vals">
-      <div class="tt-vec tt-vec-row">
-        <div class="tt-vec-cell ${stateHot ? 'tt-vec-hot' : ''}">${px}</div>
-        <div class="tt-vec-cell ${stateHot ? 'tt-vec-hot' : ''}">${py}</div>
-      </div>
-      <div class="tt-op">×</div>
-      <div class="tt-mat tt-mat-cols">
-        <span class="model-tag floating">Model</span>
-        <div class="tt-mat-row">
-          <span class="tt-cell tt-mt ${c0Hot ? 'tt-col-hot' : ''}">${a}</span>
-          <span class="tt-cell tt-mt ${c1Hot ? 'tt-col-hot' : ''}">${b}</span>
-        </div>
-        <div class="tt-mat-row">
-          <span class="tt-cell tt-mt ${c0Hot ? 'tt-col-hot' : ''}">${c}</span>
-          <span class="tt-cell tt-mt ${c1Hot ? 'tt-col-hot' : ''}">${d}</span>
-        </div>
-      </div>
-      <div class="tt-op">=</div>
-      <div class="tt-vec tt-vec-row">
-        <div class="tt-vec-cell ${c0Hot ? 'tt-out-hot' : ''}">${out0}</div>
-        <div class="tt-vec-cell ${c1Hot ? 'tt-out-hot' : ''}">${out1}</div>
-      </div>
-    </div>`;
-}
+function refreshToyTransformer() {
+  const root = document.getElementById('toy-transformer');
+  if (!root) return;
+  const result = ttRun(TT_STATE.prefix);
+  const target = TT_STATE.prefix === 'CA' ? 'T' : 'D';
+  const other = target === 'T' ? 'D' : 'T';
+  const phase = TT_STATE.phase;
+  const focus = document.getElementById('tt-focus');
+  const kicker = document.getElementById('tt-focus-kicker');
+  const sequence = document.getElementById('tt-sequence');
+  const step = document.getElementById('tt-step');
+  const count = document.getElementById('tt-step-count');
+  const probabilities = document.getElementById('tt-probabilities');
 
-function refreshToyTransformer(opts) {
-  opts = opts || {};
-  const eq = document.getElementById('tt-eq');
-  if (eq) {
-    const prev = TOY_STATE.prevState || TOY_EMB.START;
-    eq.innerHTML = buildToyEqHTML(prev, TOY_W, opts.result || null, opts.highlight === undefined ? -1 : opts.highlight);
-  }
-
-  const expl = document.getElementById('tt-explain');
-  if (expl && opts.explain !== undefined) expl.innerHTML = opts.explain;
-
-  const state = TOY_STATE.state;
-  const vec = document.getElementById('tt-state-vec');
-  if (vec) {
-    vec.setAttribute('x2', (state[0] * 100).toFixed(2));
-    vec.setAttribute('y2', (-state[1] * 100).toFixed(2));
-  }
-  const out = document.getElementById('tt-output');
-  if (out) out.textContent = TOY_STATE.history.join(' → ');
-}
-
-// Per-click animation: highlight col 0 → col 1 → land on token.
-let TT_ANIM = null;
-function stepToyTransformer() {
-  // If an animation is in flight, fast-forward it to completion first,
-  // then fall through to start the NEXT prediction in the same click.
-  if (TT_ANIM) finishToyTransformerAnim();
-  if (TOY_STATE.history.length >= 4) return;
-  const prev = TOY_STATE.state.slice();
-  const next = toyRowMatVec(prev, TOY_W);
-  let bestTok = TOY_TOKENS[0], bestDot = -Infinity;
-  for (const t of TOY_TOKENS) {
-    const d = toyDot(next, TOY_EMB[t]);
-    if (d > bestDot) { bestDot = d; bestTok = t; }
-  }
-
-  TOY_STATE.prevState = prev;
-  const [a, b] = TOY_W[0], [c, d] = TOY_W[1];
-  const [px, py] = prev;
-
-  // Stash everything the final phase needs so we can jump to it instantly
-  // if the user clicks again while the animation is still playing.
-  TOY_STATE.pendingFinal = {
-    next, bestTok, bestDot,
-    phase1: {
-      highlight: 1,
-      result: [next[0], next[1]],
-      explain: `Column 2 of W · state = (${px})(${b}) + (${py})(${d}) = <strong class="ph">${next[1]}</strong>`,
-    },
-    phase2: {
-      highlight: 2,
-      result: [next[0], next[1]],
-      explain: `new state <strong class="ph">[${next[0]}, ${next[1]}]</strong> matches token <strong>${bestTok}</strong> (dot product = ${bestDot.toFixed(0)}).`,
-    },
-  };
-
-  // Phase 0: highlight column 0 → produces out[0]
-  refreshToyTransformer({
-    highlight: 0,
-    result: [next[0], null],
-    explain: `Column 1 of W · state = (${px})(${a}) + (${py})(${c}) = <strong class="ph">${next[0]}</strong>`,
+  root.querySelectorAll('.tt-prefix').forEach(button => {
+    const active = button.dataset.prefix === TT_STATE.prefix;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
   });
+  sequence.innerHTML = `
+    <span class="tt-token-chip">${result.labels[0]}</span>
+    <span class="tt-token-chip">${result.labels[1]}</span>
+    <span class="tt-token-arrow">→</span>
+    <span class="tt-token-chip predicted ${phase === 5 ? 'is-visible' : ''}">${phase === 5 ? target : '?'}</span>`;
 
-  TT_ANIM = setTimeout(() => {
-    // Phase 1: highlight column 1 → produces out[1]
-    refreshToyTransformer(TOY_STATE.pendingFinal.phase1);
+  const phaseContent = [
+    {
+      kicker: 'The challenge',
+      html: `<div class="tt-prompt">The current token is <strong>A</strong> in both cases. Which earlier token should change the answer?</div>`,
+      button: 'Start with token vectors →',
+    },
+    {
+      kicker: '1 · Embed the two tokens',
+      html: ttEmbeddingHtml(result),
+      button: 'Next: attention scores →',
+    },
+    {
+      kicker: '2 · Compare queries with keys',
+      html: ttQueryKeyScoreHtml(result),
+      button: 'Next: softmax weights →',
+    },
+    {
+      kicker: '3 · Turn scores into attention',
+      html: `${ttMatrixHtml(result.attention, result.labels, result.labels, 'weights')}<p class="tt-caption">The final <code>A</code> puts most of its attention on the first token: <strong>${result.labels[0]}</strong>.</p>`,
+      button: 'Next: build the contextual state →',
+    },
+    {
+      kicker: '4 · Mix context into A',
+      html: ttContextHtml(result),
+      button: 'Next: transform and predict →',
+    },
+    {
+      kicker: '5 · Transform and score every token',
+      html: ttPredictionHtml(result, target, other),
+      button: 'Prediction complete',
+    },
+  ][phase];
 
-    TT_ANIM = setTimeout(() => {
-      // Phase 2: commit new state, animate vector
-      commitToyFinalPhase();
-    }, 1800);
-  }, 1800);
+  kicker.textContent = phaseContent.kicker;
+  focus.innerHTML = phaseContent.html;
+  step.textContent = phaseContent.button;
+  step.disabled = phase >= 5;
+  count.textContent = `step ${phase} / 5`;
+
+  const candidates = [
+    { token: target, probability: result.probabilities[TT_TOKENS.indexOf(target)], winner: phase === 5 },
+    { token: other, probability: result.probabilities[TT_TOKENS.indexOf(other)], winner: false },
+  ];
+  probabilities.innerHTML = candidates.map(item => {
+    const pct = item.probability * 100;
+    return `
+      <div class="tt-prob-row ${item.winner ? 'winner' : ''}">
+        <span class="tt-prob-token">${item.token}</span>
+        <span class="tt-prob-track"><span class="tt-prob-fill" style="width:${phase === 5 ? Math.max(1, pct) : 0}%"></span></span>
+        <span class="tt-prob-value">${phase === 5 ? pct.toFixed(1) + '%' : '—'}</span>
+      </div>`;
+  }).join('');
 }
 
-// Apply the final-commit phase of the currently-in-flight prediction
-// immediately and clear any pending timeouts.
-function finishToyTransformerAnim() {
-  if (TT_ANIM) { clearTimeout(TT_ANIM); TT_ANIM = null; }
-  if (TOY_STATE.pendingFinal) commitToyFinalPhase();
-}
-
-function commitToyFinalPhase() {
-  const pf = TOY_STATE.pendingFinal;
-  if (!pf) return;
-  TOY_STATE.state = pf.next;
-  TOY_STATE.history.push(pf.bestTok);
-  refreshToyTransformer(pf.phase2);
-  TOY_STATE.pendingFinal = null;
-  TT_ANIM = null;
-  const sb = document.getElementById('tt-step');
-  if (sb) sb.disabled = (TOY_STATE.history.length >= 4);
+function stepToyTransformer() {
+  TT_STATE.phase = Math.min(5, TT_STATE.phase + 1);
+  refreshToyTransformer();
 }
 function resetToyTransformer() {
-  if (TT_ANIM) { clearTimeout(TT_ANIM); TT_ANIM = null; }
-  TOY_STATE.step = 0;
-  TOY_STATE.history = ['START'];
-  TOY_STATE.state = TOY_EMB.START.slice();
-  TOY_STATE.prevState = null;
-  TOY_STATE.pendingFinal = null;
-  const sb = document.getElementById('tt-step');
-  if (sb) sb.disabled = false;
-  refreshToyTransformer({ highlight: -1, explain: 'Press <strong>Predict next token</strong> to multiply the matrix.' });
+  TT_STATE.phase = 0;
+  refreshToyTransformer();
 }
 function wireToyTransformer() {
   const root = document.getElementById('toy-transformer');
-  if (!root) return;
-  const step = document.getElementById('tt-step');
-  const reset = document.getElementById('tt-reset');
-  if (step) step.addEventListener('click', stepToyTransformer);
-  if (reset) reset.addEventListener('click', resetToyTransformer);
+  if (!root || root.dataset.wired) return;
+  root.dataset.wired = '1';
+  root.addEventListener('click', event => {
+    const prefix = event.target.closest('[data-prefix]');
+    if (prefix) {
+      TT_STATE.prefix = prefix.dataset.prefix;
+      TT_STATE.phase = 0;
+      refreshToyTransformer();
+      return;
+    }
+    if (event.target.closest('#tt-step')) stepToyTransformer();
+    if (event.target.closest('#tt-reset')) resetToyTransformer();
+  });
 }
 
 // ============================================================
-//  Slide 7 — Zoom-out animation: 4 dots → trillion-param galaxy
+//  Slide 7 — Zoom-out animation: tiny vector → published frontier scale
 // ============================================================
 let ZOOM_ANIM = null;
 let ZOOM_CACHE = null;   // { canvas: HTMLCanvasElement, caption: string } — set once the animation has played far enough
@@ -703,23 +856,34 @@ function startZoomOut() {
   // ring* of the currently visible area so as we zoom out they always appear
   // along the edge — leaving a uniformly populated universe behind us.
   const parts = [];
-  const ANCHORS = [
-    { x:  0.6, y:  0.0 },
-    { x:  0.0, y:  0.6 },
-    { x: -0.6, y:  0.0 },
-    { x:  0.0, y: -0.6 },
-  ];
-  for (const a of ANCHORS) parts.push({ x: a.x, y: a.y, hue: 0.5, anchor: true, born: 0, parent: -1 });
+  const INITIAL_PARAMETERS = 42;
+  const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < INITIAL_PARAMETERS; i++) {
+    const radius = 0.12 + 0.68 * Math.sqrt((i + 0.5) / INITIAL_PARAMETERS);
+    const angle = i * GOLDEN_ANGLE;
+    parts.push({
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
+      hue: i / INITIAL_PARAMETERS,
+      anchor: false,
+      hub: i < 5,
+      born: -1000,
+      parent: -1,
+      parent2: -1,
+      pulseSeed: i,
+    });
+  }
 
   // Spatial bucketing — used to find "nearby" parents quickly when we add new
   // particles to grow the web.  Keyed by quantized (x, y) in model space.
   const BUCKET_BITS = 0;  // unused — we keep track via a sliding window instead.
 
   const labels = [
-    { t: 0.00, txt: '4 numbers — a toy "word vector"' },
-    { t: 0.20, txt: 'Scale up: hundreds of dimensions' },
-    { t: 0.45, txt: 'A small model: ~100 million parameters' },
-    { t: 0.75, txt: 'A modern model: ~1 trillion parameters' },
+    { t: 0.00, txt: '42 = 10 token + 4 position + 16 attention + 8 MLP + 4 normalization' },
+    { t: 0.20, txt: 'Scale up: larger vocabularies · wider vectors · more layers' },
+    { t: 0.45, txt: 'GPT-1 (2018): 117 million parameters' },
+    { t: 0.70, txt: 'Llama 3.1 (2024): 405 billion dense parameters' },
+    { t: 0.88, txt: 'Llama 4 Behemoth: ~2T total · ~288B active per token (MoE)' },
   ];
 
   const start = performance.now();
@@ -928,6 +1092,35 @@ function stopZoomOut() {
   }
 }
 
+function renderZoomStatic() {
+  const canvas = document.getElementById('zoom-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = canvas.clientWidth;
+  const H = canvas.clientHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const gradient = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.65);
+  gradient.addColorStop(0, 'rgba(91,233,185,0.09)');
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 1400; i++) {
+    const x = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1 * W;
+    const y = (Math.sin(i * 78.233) * 12345.6789 % 1 + 1) % 1 * H;
+    const hub = i % 53 === 0;
+    ctx.fillStyle = hub ? 'rgba(242,182,90,0.85)' : 'rgba(122,217,229,0.55)';
+    ctx.beginPath();
+    ctx.arc(x, y, hub ? 2.2 : 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const caption = document.getElementById('zoom-caption');
+  if (caption) caption.textContent = 'Llama 4 Behemoth: ~2T total · ~288B active per token (MoE)';
+}
+
 // ============================================================
 //  Slide 9 — Architecture diagram: hover popovers
 // ============================================================
@@ -937,14 +1130,53 @@ function wireArchPopovers() {
   root.dataset.wired = '1';
   const pop = root.querySelector('.arch-pop');
   if (!pop) return;
-  root.querySelectorAll('[data-arch-info]').forEach(el => {
-    el.addEventListener('mouseenter', (e) => {
+  pop.id = 'arch-popover';
+  pop.setAttribute('role', 'status');
+  pop.setAttribute('aria-live', 'polite');
+  let pinned = null;
+  const show = el => {
       const txt = el.getAttribute('data-arch-info');
       const title = el.getAttribute('data-arch-title') || '';
       pop.innerHTML = `<div class="arch-pop-title">${title}</div><div class="arch-pop-body">${txt}</div>`;
       pop.classList.add('is-on');
+  };
+  const hide = () => {
+    if (!pinned) pop.classList.remove('is-on');
+  };
+  root.querySelectorAll('[data-arch-info]').forEach(el => {
+    const title = el.getAttribute('data-arch-title') || 'Architecture component';
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', `${title}. Press Enter for details.`);
+    el.setAttribute('aria-controls', 'arch-popover');
+    el.setAttribute('aria-pressed', 'false');
+    el.addEventListener('mouseenter', () => show(el));
+    el.addEventListener('mouseleave', hide);
+    el.addEventListener('focus', () => show(el));
+    el.addEventListener('blur', hide);
+    el.addEventListener('click', () => {
+      if (pinned === el) {
+        pinned = null;
+        el.setAttribute('aria-pressed', 'false');
+        pop.classList.remove('is-on');
+      } else {
+        if (pinned) pinned.setAttribute('aria-pressed', 'false');
+        pinned = el;
+        el.setAttribute('aria-pressed', 'true');
+        show(el);
+      }
     });
-    el.addEventListener('mouseleave', () => pop.classList.remove('is-on'));
+    el.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      } else if (event.key === 'Escape') {
+        pinned = null;
+        el.setAttribute('aria-pressed', 'false');
+        pop.classList.remove('is-on');
+        el.blur();
+      }
+    });
   });
 }
 
@@ -955,11 +1187,11 @@ function renderSWEBench() {
   const canvas = document.getElementById('swebench-chart');
   if (!canvas || CHARTS.swebench) return;
   const data = {
-    labels: ['Mar 2024', 'Aug 2024', 'Dec 2024', 'Apr 2025', 'Aug 2025', 'Feb 2026'],
+    labels: CLAIMS.sweBenchVerified.labels,
     datasets: [
       {
-        label: 'SWE-bench Verified (% solved)',
-        data: [13, 22, 49, 62, 70, 75],
+        label: 'Selected SWE-bench Verified systems (% solved)',
+        data: CLAIMS.sweBenchVerified.values,
         borderColor: '#5BE9B9',
         backgroundColor: 'rgba(91,233,185,0.18)',
         tension: 0.35,
@@ -977,7 +1209,7 @@ function renderSWEBench() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: true },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y}% real GitHub issues solved` } }
+        tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y}% of Verified tasks resolved` } }
       },
       scales: {
         y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1B2236' } },
@@ -993,26 +1225,34 @@ function renderSWEBench() {
 function renderHollowing() {
   const canvas = document.getElementById('hollow-chart');
   if (!canvas || CHARTS.hollow) return;
-  // Stanford "Canaries in the Coal Mine" — employment change by age cohort
-  // in AI-exposed occupations (2022-2025). Negative = jobs lost.
+  // Stanford "Canaries in the Coal Mine" — relative employment change in
+  // highly AI-exposed occupations after firm-level controls (2022-2025).
   CHARTS.hollow = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: ['22–25', '26–30', '31–40', '41–50', '51–60'],
+      labels: CLAIMS.earlyCareerEmployment.labels,
       datasets: [{
-        label: 'Employment change in AI-exposed roles (%)',
-        data: [-16, -7, -1, +2, +3],
-        backgroundColor: (ctx) => ctx.parsed.y < 0 ? '#F08A8A' : '#5BE9B9',
+        label: 'Relative employment change (%)',
+        data: CLAIMS.earlyCareerEmployment.values,
+        backgroundColor: ['#F08A8A', '#7AD9E5'],
+        minBarLength: 8,
         borderRadius: 6,
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => (ctx.parsed.y > 0 ? '+' : '') + ctx.parsed.y + '%' } } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.dataIndex === 1 ? 'Broadly stable (approximately 0%)' : `${ctx.parsed.y}% relative change`,
+          },
+        },
+      },
       scales: {
         y: { ticks: { callback: v => (v > 0 ? '+' : '') + v + '%' }, grid: { color: '#1B2236' } },
-        x: { title: { display: true, text: 'Age bracket', color: '#7D8AA0' }, grid: { display: false } }
+        x: { grid: { display: false } }
       }
     }
   });
@@ -1021,32 +1261,32 @@ function renderHollowing() {
 // ============================================================
 //  Slide 19 — Energy slider
 // ============================================================
-const ENERGY_DEFAULTS = { tokens: 2500 };  // ~2.5B ChatGPT messages/day (OpenAI, Aug 2025)
+const ENERGY_DEFAULTS = CLAIMS.energy;
 function renderEnergy() {
   const root = document.getElementById('energy-widget');
   if (!root || root.dataset.built) return;
   root.dataset.built = '1';
   root.innerHTML = `
     <div class="field">
-      <label>Daily ChatGPT-class queries (millions) <span class="val" id="en-val">${ENERGY_DEFAULTS.tokens.toLocaleString()}</span></label>
-      <input type="range" id="en-tokens" min="10" max="5000" step="10" value="${ENERGY_DEFAULTS.tokens}">
-      <div class="en-tick small muted" style="margin-top:0.3em;">default = 2.5 billion / day — what OpenAI reported for ChatGPT in Aug 2025</div>
+      <label for="en-tokens">Daily ChatGPT-class queries (millions) <span class="val" id="en-val">${ENERGY_DEFAULTS.defaultQueriesMillions.toLocaleString()}</span></label>
+      <input type="range" id="en-tokens" min="10" max="5000" step="10" value="${ENERGY_DEFAULTS.defaultQueriesMillions}" aria-describedby="en-scope">
+      <div class="en-tick small muted" id="en-scope" style="margin-top:0.3em;">Default = 2.5 billion prompts/day, reported July 2025. The estimate below covers inference compute only.</div>
     </div>
     <div class="stat-row mt-2">
       <div class="stat"><div class="stat-label">Energy / day</div><div class="stat-value phos" id="en-kwh">—</div></div>
-      <div class="stat"><div class="stat-label">≈ U.S. homes powered for a day</div><div class="stat-value amber" id="en-homes">—</div></div>
-      <div class="stat"><div class="stat-label">CO₂ / day (US grid avg)</div><div class="stat-value rose" id="en-co2">—</div></div>
+      <div class="stat"><div class="stat-label">Equivalent household-days</div><div class="stat-value amber" id="en-homes">—</div></div>
+      <div class="stat"><div class="stat-label">CO₂-equivalent / day (U.S. avg)</div><div class="stat-value rose" id="en-co2">—</div></div>
     </div>
-    <p class="small muted mt-2">Per query: ~0.3 Wh (Epoch AI 2025 — typical GPT-4o; long-context or reasoning can exceed 5–40 Wh). U.S. home avg: 30 kWh/day. Grid avg: 0.35 kg CO₂/kWh (EPA eGRID 2023).</p>`;
+    <p class="small muted mt-2">Assumptions: 0.3 Wh/query · 30 kWh/U.S. household-day · 0.35 kg CO₂e/kWh. Cooling, networking, idle capacity, training, and non-U.S. grids are excluded.</p>`;
   computeEnergy();
 }
 function computeEnergy() {
   const root = document.getElementById('energy-widget'); if (!root) return;
   const m = parseFloat(document.getElementById('en-tokens').value) || 0;
   document.getElementById('en-val').textContent = m.toLocaleString();
-  const kwhPerDay = (m * 1e6) * 0.0003;                 // 0.3 Wh/query
-  const homes = kwhPerDay / 30;
-  const co2 = kwhPerDay * 0.35;
+  const kwhPerDay = (m * 1e6) * (ENERGY_DEFAULTS.wattHoursPerQuery / 1000);
+  const homes = kwhPerDay / ENERGY_DEFAULTS.householdKwhPerDay;
+  const co2 = kwhPerDay * ENERGY_DEFAULTS.kilogramsCo2ePerKwh;
   document.getElementById('en-kwh').textContent  = fmtSI(kwhPerDay) + ' kWh';
   document.getElementById('en-homes').textContent = fmtSI(homes);
   document.getElementById('en-co2').textContent  = fmtSI(co2) + ' kg';
@@ -1065,27 +1305,7 @@ function fmtSI(n) {
 // ============================================================
 //  Slide 20 — Wealth: dropdown comparing AI capex/mcap to countries
 // ============================================================
-const WEALTH_ITEMS = [
-  { id: 'nvda',  label: 'NVIDIA market cap',           usd: 5.2e12,
-    desc: 'Larger than the entire UK stock market combined.' },
-  { id: 'capex', label: '2026 hyperscaler AI capex',   usd: 3.0e11,
-    desc: 'Microsoft + Google + Amazon + Meta combined — bigger than Portugal\'s GDP (~$290B).' },
-  { id: 'stargate', label: 'OpenAI "Stargate" plan',   usd: 5.0e11,
-    desc: '$500B over 4 years — comparable to the entire Apollo program (~$280B in 2024 dollars).' },
-  { id: 'mag7gain', label: 'S&P "Magnificent 7" 2024 gain', usd: 5.5e12,
-    desc: 'Seven AI-correlated stocks drove the majority of US equity gains.' },
-];
-const COUNTRY_GDP = [
-  { name: 'Iceland',    usd: 32e9 },
-  { name: 'Hungary',    usd: 207e9 },
-  { name: 'Portugal',   usd: 290e9 },
-  { name: 'Greece',     usd: 245e9 },
-  { name: 'Switzerland',usd: 905e9 },
-  { name: 'Spain',      usd: 1.6e12 },
-  { name: 'France',     usd: 3.0e12 },
-  { name: 'UK',         usd: 3.4e12 },
-  { name: 'Japan',      usd: 4.2e12 },
-];
+const WEALTH_ITEMS = CLAIMS.capitalScale;
 function renderWealth() {
   const root = document.getElementById('wealth-widget');
   if (!root || root.dataset.built) return;
@@ -1093,14 +1313,14 @@ function renderWealth() {
   root.innerHTML = `
     <div class="w-pills" id="w-pills">
       ${WEALTH_ITEMS.map((it, i) => `
-        <button class="w-pill ${i === 0 ? 'is-active' : ''}" data-id="${it.id}">
+        <button class="w-pill ${i === 0 ? 'is-active' : ''}" type="button" data-id="${it.id}">
           <span class="w-pill-label">${it.label}</span>
           <span class="w-pill-value">$${fmtUSD(it.usd)}</span>
         </button>`).join('')}
     </div>
     <div class="stat-row mt-2">
       <div class="stat"><div class="stat-label">Value</div><div class="stat-value amber" id="w-val">—</div></div>
-      <div class="stat"><div class="stat-label">≈ country GDP</div><div class="stat-value phos" id="w-eq">—</div></div>
+      <div class="stat"><div class="stat-label">What this number measures</div><div class="stat-value phos" id="w-kind">—</div></div>
     </div>
     <p class="small muted mt-2" id="w-desc">—</p>`;
   WEALTH_STATE.pick = WEALTH_ITEMS[0].id;
@@ -1112,14 +1332,8 @@ function computeWealth() {
   const pick = WEALTH_STATE.pick;
   const it = WEALTH_ITEMS.find(x => x.id === pick); if (!it) return;
   document.getElementById('w-val').textContent = '$' + fmtUSD(it.usd);
-  let best = COUNTRY_GDP[0], bestD = Infinity;
-  for (const c of COUNTRY_GDP) {
-    const d = Math.abs(Math.log(c.usd) - Math.log(it.usd));
-    if (d < bestD) { bestD = d; best = c; }
-  }
-  const ratio = (it.usd / best.usd);
-  document.getElementById('w-eq').textContent = `${best.name} × ${ratio.toFixed(1)}`;
-  document.getElementById('w-desc').textContent = it.desc;
+  document.getElementById('w-kind').textContent = it.kind;
+  document.getElementById('w-desc').textContent = `${it.desc} · As of: ${it.asOf}.`;
   // sync active pill
   document.querySelectorAll('#w-pills .w-pill').forEach(p => {
     p.classList.toggle('is-active', p.dataset.id === pick);
@@ -1143,7 +1357,7 @@ function startWealthAutoCycle() {
     WEALTH_STATE.idx = (WEALTH_STATE.idx + 1) % WEALTH_ITEMS.length;
     WEALTH_STATE.pick = WEALTH_ITEMS[WEALTH_STATE.idx].id;
     computeWealth();
-  }, 3200);
+  }, 6500);
 }
 function stopWealthAutoCycle() {
   if (WEALTH_STATE.timer) { clearInterval(WEALTH_STATE.timer); WEALTH_STATE.timer = null; }
@@ -1243,6 +1457,12 @@ function startAgentLoopAnim() {
 function stopAgentLoopAnim() {
   if (AL_CYCLE) { clearInterval(AL_CYCLE); AL_CYCLE = null; }
   if (AL_LOG_TIMER) { clearTimeout(AL_LOG_TIMER); AL_LOG_TIMER = null; }
+}
+function showAgentLoopStatic() {
+  const log = document.getElementById('al-log');
+  if (!log) return;
+  log.innerHTML = AGENT_LOOP_LINES.map(line => `<div class="l-line ${line.cls}" style="opacity:1">${line.txt}</div>`).join('');
+  document.querySelectorAll('.al-node, .al-arrow').forEach(element => element.classList.remove('is-active'));
 }
 
 // ============================================================
@@ -1498,7 +1718,7 @@ function onSlideChange(e) {
   const slide = e && e.currentSlide;
   refitWidgets();
   // Title-slide backdrop: re-spawn if it lost its container after navigation back
-  spawnMatrixBackdrop();
+  if (!PRESENTATION_ANIMATIONS_PAUSED) spawnMatrixBackdrop();
   // Slide 4: scratch-out animation plays AUTOMATICALLY on slide entry.
   // Reset (to restart from frame 0 even if revisited), then schedule the play
   // on the next frame so the reset's reflow lands first.
@@ -1507,31 +1727,34 @@ function onSlideChange(e) {
     requestAnimationFrame(() => requestAnimationFrame(playReviewScratch));
   }
   // Slide 7: zoom-out — only run when on that slide
-  if (slide && slide.querySelector('#zoom-canvas')) {
+  if (slide && slide.querySelector('#zoom-canvas') && !PRESENTATION_ANIMATIONS_PAUSED) {
     startZoomOut();
+  } else if (slide && slide.querySelector('#zoom-canvas')) {
+    renderZoomStatic();
   } else {
     stopZoomOut();
   }
   // Slide 10: agent loop animation
-  if (slide && slide.querySelector('.agent-loop')) {
+  if (slide && slide.querySelector('.agent-loop') && !PRESENTATION_ANIMATIONS_PAUSED) {
     startAgentLoopAnim();
+  } else if (slide && slide.querySelector('.agent-loop')) {
+    showAgentLoopStatic();
   } else {
     stopAgentLoopAnim();
   }
   // Slide 14: agent typing animation
-  if (slide && slide.querySelector('#tool-typing-pre')) {
+  if (slide && slide.querySelector('#tool-typing-pre') && !PRESENTATION_ANIMATIONS_PAUSED) {
     startToolTypingAnim();
   } else {
     stopToolTypingAnim();
   }
   // Slide 15: MCP spoke auto-cycle
-  if (slide && slide.querySelector('.mcp-hub')) {
+  if (slide && slide.querySelector('.mcp-hub') && !PRESENTATION_ANIMATIONS_PAUSED) {
     startMcpAutoCycle();
   } else {
     stopMcpAutoCycle();
   }
-  // Slide 20: wealth pill auto-cycle
-  if (slide && slide.querySelector('#wealth-widget')) {
+  if (slide && slide.querySelector('#wealth-widget') && !PRESENTATION_ANIMATIONS_PAUSED) {
     startWealthAutoCycle();
   } else {
     stopWealthAutoCycle();
@@ -1540,45 +1763,16 @@ function onSlideChange(e) {
   if (slide) requestAnimationFrame(() => autoFitSlide(slide));
 }
 
-// Scale down a slide section's inner content if it would overflow the 800px box.
-// We wrap children in a single .auto-fit-inner div the first time we see them,
-// measure its scrollHeight, and apply a uniform transform: scale() if needed.
+// Flag overflow instead of silently shrinking an entire slide. Uniform scaling
+// made text and citations unreadable while hiding content-density regressions.
 function autoFitSlide(section) {
   if (!section) return;
-  // Title slides own their layout — leave them alone.
-  if (section.classList.contains('title-slide')) return;
-  // Read available content height = section height minus top/bottom padding.
   const cs = getComputedStyle(section);
   const padTop = parseFloat(cs.paddingTop) || 0;
   const padBot = parseFloat(cs.paddingBottom) || 0;
-  // Reveal slides are 800px tall in slide-space.
-  const SLIDE_H = section.clientHeight || 800;
-  const available = SLIDE_H - padTop - padBot;
-  // Wrap once.
-  let inner = section.querySelector(':scope > .auto-fit-inner');
-  if (!inner) {
-    inner = document.createElement('div');
-    inner.className = 'auto-fit-inner';
-    inner.style.transformOrigin = 'top left';
-    inner.style.width = '100%';
-    // Move all non-absolute, non-fixed children into it (preserves order).
-    const children = Array.from(section.children);
-    for (const c of children) {
-      const ccs = getComputedStyle(c);
-      if (ccs.position === 'absolute' || ccs.position === 'fixed') continue;
-      inner.appendChild(c);
-    }
-    section.appendChild(inner);
-  }
-  // Reset before measuring.
-  inner.style.transform = '';
-  inner.style.height = '';
-  const need = inner.scrollHeight;
-  if (need > available && available > 0) {
-    const scale = Math.max(0.55, available / need);
-    inner.style.transform = `scale(${scale.toFixed(4)})`;
-    // Keep wrapper from claiming the unscaled space (prevents extra slide-height).
-    inner.style.height = (need * scale) + 'px';
-    inner.style.width = (100 / scale).toFixed(2) + '%';
-  }
+  const available = (section.clientHeight || 800) - padTop - padBot;
+  const contentBottom = Array.from(section.children)
+    .filter(child => !['absolute', 'fixed'].includes(getComputedStyle(child).position))
+    .reduce((bottom, child) => Math.max(bottom, child.offsetTop + child.offsetHeight), 0);
+  section.classList.toggle('has-layout-overflow', contentBottom > padTop + available + 1);
 }

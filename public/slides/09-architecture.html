@@ -3,7 +3,9 @@
   <h2>The whole stack — not just the model</h2>
 
   <div id="arch-diagram" class="mt-1">
-    <svg class="arch-svg" viewBox="0 0 1100 460" xmlns="http://www.w3.org/2000/svg">
+    <svg class="arch-svg" viewBox="0 0 1100 460" xmlns="http://www.w3.org/2000/svg" role="group" aria-labelledby="arch-title arch-desc">
+      <title id="arch-title">Common components in a modern AI assistant</title>
+      <desc id="arch-desc">A layered diagram covering input, safety, model routing, foundation model, tools, retrieval, code execution, output checks, and telemetry. Interactive nodes reveal descriptions.</desc>
       <!-- lane backgrounds (alternating) -->
       <rect class="arch-lane-bg" x="0" y="20"  width="1100" height="70"/>
       <rect class="arch-lane-bg" x="0" y="180" width="1100" height="80"/>
@@ -43,10 +45,10 @@
       </g>
 
       <!-- Lane 3: Model core (big box) -->
-      <g class="arch-node" data-arch-title="LLM core (transformer)" data-arch-info="The trillion-parameter neural net. Token-in → next-token-out. Everything else is plumbing around this box.">
-        <rect x="350" y="190" width="400" height="60"/><text x="550" y="220">LLM core · trillion-param transformer</text>
+      <g class="arch-node" data-arch-title="Foundation model" data-arch-info="Usually a transformer or mixture-of-experts model. Parameter counts vary widely; the core predicts tokens while the surrounding product supplies tools, data, policy, and state.">
+        <rect x="350" y="190" width="400" height="60"/><text x="550" y="220">Foundation model · transformer / MoE</text>
       </g>
-      <g class="arch-node" data-arch-title="Reasoning loop" data-arch-info="Newer models generate a private 'thinking' scratchpad before answering. Trades latency for accuracy.">
+      <g class="arch-node" data-arch-title="Deliberation / reasoning" data-arch-info="Some models spend extra inference compute before answering. Products expose, summarize, or hide that process differently. More compute can improve difficult answers, but not guarantee them.">
         <rect x="780" y="190" width="160" height="60"/><text x="860" y="220">Thinking</text>
       </g>
 
@@ -85,8 +87,8 @@
       <g class="arch-node" data-arch-title="Telemetry / logging" data-arch-info="Latency, cost, refusal rate, user feedback — fed back into training data for the next model version.">
         <rect x="440" y="420" width="200" height="32"/><text x="540" y="436">Telemetry</text>
       </g>
-      <g class="arch-node" data-arch-title="RLHF feedback loop" data-arch-info="Thumbs up/down and edits become training signal. Closing the loop is how the model keeps improving.">
-        <rect x="680" y="420" width="200" height="32"/><text x="780" y="436">RLHF feedback</text>
+      <g class="arch-node" data-arch-title="Curated feedback" data-arch-info="Selected ratings, edits, and failure reports may be reviewed, filtered, and used in later evaluation or post-training. Models do not normally learn from each chat in real time.">
+        <rect x="680" y="420" width="200" height="32"/><text x="780" y="436">Curated feedback</text>
       </g>
 
       <!-- A few connecting edges (left intentionally sparse) -->
@@ -100,5 +102,5 @@
     <div class="arch-pop"><div class="arch-pop-title">Hover any box</div><div class="arch-pop-body">…to see what it does.</div></div>
   </div>
 
-  <p class="bg-source">Sources: Anthropic system cards · OpenAI system cards &amp; safety evals · arXiv 2308.11432 (LLM agent surveys) · Karpathy "LLM OS" talks.</p>
+  <p class="bg-source">A common product stack, not one universal design. Sources: Anthropic and OpenAI system cards · model-provider tool/RAG documentation · arXiv 2308.11432.</p>
 </section>

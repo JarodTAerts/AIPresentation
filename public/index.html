@@ -204,33 +204,39 @@
     </h1>
     <p class="subtitle">What it is, how it works, and what it's already changing.</p>
     <div class="cta-row">
-      <a href="/presentation" class="btn btn-primary">
-        Watch the presentation <span class="arrow">→</span>
+      <a href="/presentation/1" class="btn btn-primary">
+        Open the presentation <span class="arrow">→</span>
       </a>
-      <a href="/presentation/1" class="btn btn-ghost">Open slides directly</a>
+      <a href="/presentation" class="btn btn-ghost">Slides + video layout</a>
     </div>
   </section>
 
   <section class="deck-feature">
     <div>
-      <h2>The deck: <span style="font-weight:500; color:var(--ink-soft);">~30 min, 24 interactive slides</span></h2>
-      <p>Walk through the math underneath today's AI, a 5-second working "transformer," the actual architecture of a modern assistant, what's changing in coding and knowledge work — and the real-world costs (energy, wealth concentration, jobs, ethics). Every chart and widget is editable; try your own numbers.</p>
+      <h2>The deck: <span style="font-weight:500; color:var(--ink-soft);">~30 min, <span id="deck-count">interactive slides</span></span></h2>
+      <p>Walk through tokens, matrix multiplication, a genuine tiny attention model, the architecture around modern assistants, what coding evidence does and does not show, and the real-world trade-offs around work, energy, capital, hardware, and governance.</p>
       <div class="meta">
         <span class="chip phos">~30 minutes</span>
         <span class="chip">Interactive</span>
         <span class="chip amber">Beginner-friendly</span>
       </div>
     </div>
-    <a href="/presentation" class="btn btn-primary">Watch <span class="arrow">→</span></a>
+    <a href="/presentation/1" class="btn btn-primary">Open <span class="arrow">→</span></a>
   </section>
 
 </main>
 
 <footer>
-  A Jarod Aerts Production
+  A Jarod Aerts Production · Updated July 2026
 </footer>
 
+<script src="js/slide-manifest.js?v=20260711"></script>
 <script>
+  const deckCount = document.getElementById('deck-count');
+  if (deckCount && Array.isArray(window.SLIDE_MANIFEST)) {
+    deckCount.textContent = `${window.SLIDE_MANIFEST.length} slides`;
+  }
+
   // Same drifting matrix-multiply backdrop as the title slide.
   (function () {
     const wrap = document.getElementById('page-matrix-bg');

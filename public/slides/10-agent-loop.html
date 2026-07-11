@@ -1,11 +1,13 @@
 <section>
   <span class="interactive-badge">animated</span>
   <h2>The agent loop — think, act, observe, repeat</h2>
-  <p class="small muted" style="margin-top:-0.4em;">2022 = a chatbot that answers in one shot. 2026 = a model that <strong>uses tools, checks its own work, and keeps going</strong> until the job is done. A small architectural change. A big practical one.</p>
+  <p class="small muted" style="margin-top:-0.4em;">Mainstream chatbots originally emphasized one response. An agent runtime can now <strong>call tools, inspect results, and iterate</strong> until it finishes, reaches a limit, or asks for help. The loop is simple; permissions, state, sandboxing, and recovery are substantial systems engineering.</p>
 
   <div class="agent-loop mt-2">
     <div class="al-svg-wrap">
-      <svg class="al-svg" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+      <svg class="al-svg" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="agent-loop-title agent-loop-desc">
+        <title id="agent-loop-title">Agent execution loop</title>
+        <desc id="agent-loop-desc">Think, act with a tool, observe the result, and decide whether to repeat.</desc>
         <defs>
           <marker id="al-mark" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="strokeWidth">
             <path d="M0,0 L8,4 L0,8 z" fill="#5BE9B9"/>

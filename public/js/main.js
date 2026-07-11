@@ -29,9 +29,10 @@
     center: false,
     width: 1280,
     height: 800,
-    margin: 0.04,
-    minScale: 0.4,
+    margin: window.innerWidth < 600 ? 0.08 : 0.04,
+    minScale: 0.2,
     maxScale: 1.6,
+    scrollActivationWidth: 0,
     keyboard: true,
     touch: true,
     overview: true,
@@ -51,7 +52,9 @@
 
     setupPathRouting(deck);
     setupFullscreenButton();
+    setupAnimationButton();
     setupCloseDeckButton();
+    setupMobileHint();
     setupStepIntercept(deck);
     setupOverviewScroll(deck);
     setupOverviewZoom(deck);
@@ -125,6 +128,7 @@
     btn.className = 'fullscreen-btn';
     btn.type = 'button';
     btn.title = 'Fullscreen (F)';
+    btn.setAttribute('aria-label', 'Enter fullscreen');
     btn.innerHTML = ENTER;
     document.body.appendChild(btn);
 
@@ -132,6 +136,7 @@
     const update = () => {
       btn.innerHTML = isFs() ? EXIT : ENTER;
       btn.title = isFs() ? 'Exit fullscreen (Esc or F)' : 'Fullscreen (F)';
+      btn.setAttribute('aria-label', isFs() ? 'Exit fullscreen' : 'Enter fullscreen');
     };
     btn.addEventListener('click', (e) => {
       e.preventDefault(); e.stopPropagation();
@@ -141,6 +146,7 @@
         const req = el.requestFullscreen || el.webkitRequestFullscreen;
         if (req) req.call(el).catch(() => {});
       }
+
     });
     document.addEventListener('fullscreenchange', update);
     document.addEventListener('webkitfullscreenchange', update);
@@ -156,6 +162,46 @@
     btn.addEventListener('mouseenter', show);
     btn.addEventListener('mouseleave', scheduleHide);
     window.addEventListener('touchstart', show, { passive: true });
+  }
+
+  // ---------- Pause/replay timed animation ----------
+  function setupAnimationButton() {
+    if (document.getElementById('animationBtn')) return;
+    const PAUSE = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>`;
+    const PLAY = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>`;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const btn = document.createElement('button');
+    btn.id = 'animationBtn';
+    btn.className = 'animation-btn is-visible';
+    btn.type = 'button';
+    document.body.appendChild(btn);
+
+    let userPaused = reduceMotion.matches;
+    function apply(paused) {
+      document.body.classList.toggle('animations-paused', paused);
+      document.body.classList.toggle('motion-enabled', !paused && reduceMotion.matches);
+      btn.innerHTML = paused ? PLAY : PAUSE;
+      btn.title = paused ? 'Play slide animations' : 'Pause slide animations';
+      btn.setAttribute('aria-label', btn.title);
+      btn.setAttribute('aria-pressed', String(paused));
+      if (typeof setPresentationAnimationsPaused === 'function') {
+        setPresentationAnimationsPaused(paused);
+      }
+    }
+    btn.addEventListener('click', () => {
+      userPaused = !userPaused;
+      apply(userPaused);
+    });
+    reduceMotion.addEventListener('change', event => {
+      userPaused = event.matches;
+      apply(userPaused);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (typeof setPresentationAnimationsPaused !== 'function') return;
+      if (document.hidden) setPresentationAnimationsPaused(true);
+      else setPresentationAnimationsPaused(userPaused);
+    });
+    apply(userPaused);
   }
 
   // ---------- Step-through interceptor ----------
@@ -175,9 +221,22 @@
     const NAV_KEYS = new Set(['ArrowRight', 'PageDown', ' ', 'Spacebar']);
     document.addEventListener('keydown', (e) => {
       if (!NAV_KEYS.has(e.key)) return;
-      // Don't hijack typing inside form inputs/contenteditable.
       const t = e.target;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const interactive = t && t.closest &&
+        t.closest('button, a, input, textarea, select, summary, [role="button"], [contenteditable="true"]');
+      if (interactive) {
+        // Reveal also binds Space globally. Keep it from navigating when a
+        // control has focus, and preserve native button-style activation.
+        e.stopImmediatePropagation();
+        if (e.key === ' ' || e.key === 'Spacebar') {
+          const buttonLike = interactive.matches('button, [role="button"], summary');
+          if (buttonLike) {
+            e.preventDefault();
+            interactive.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          }
+        }
+        return;
+      }
       const btn = pendingStepBtn();
       if (!btn) return;
       e.preventDefault();
@@ -285,6 +344,7 @@
     btn.className = 'close-deck-btn';
     btn.href = '/';
     btn.title = 'Back to landing page';
+    btn.setAttribute('aria-label', 'Back to landing page');
     btn.innerHTML = ICON;
     document.body.appendChild(btn);
 
@@ -297,5 +357,14 @@
     btn.addEventListener('mouseenter', show);
     btn.addEventListener('mouseleave', scheduleHide);
     window.addEventListener('touchstart', show, { passive: true });
+  }
+
+  function setupMobileHint() {
+    if (document.getElementById('mobileHint')) return;
+    const hint = document.createElement('div');
+    hint.id = 'mobileHint';
+    hint.className = 'mobile-hint';
+    hint.textContent = 'Rotate to landscape for readable slides';
+    document.body.appendChild(hint);
   }
 })();

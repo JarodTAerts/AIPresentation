@@ -1,9 +1,9 @@
 <section data-background-color="#06080F">
-  <h2>From 4 numbers to a trillion</h2>
-  <p class="small muted" style="margin-top:-0.4em;">Same idea — just scaled. Watch the dots multiply as we zoom out from a toy 4-token model to today's frontier systems.</p>
+  <h2>From 42 learned numbers to frontier scale</h2>
+  <p class="small muted" style="margin-top:-0.4em;">Our complete tiny transformer has 42 learned scalar parameters: token and position vectors, normalization scales, attention projections, and MLP matrices. Real models widen every vector and repeat the block across many layers.</p>
 
-  <canvas id="zoom-canvas" class="mt-2"></canvas>
-  <div id="zoom-caption">4 numbers — a toy "word vector"</div>
+  <canvas id="zoom-canvas" class="mt-2" role="img" aria-label="Animated scale comparison from a tiny vector to published frontier-model parameter counts"></canvas>
+  <div id="zoom-caption">42 = 10 token + 4 position + 16 attention + 8 MLP + 4 normalization</div>
 
-  <p class="bg-source">GPT-4 reportedly ~1.8T parameters · Llama 4 Behemoth confirmed ~2T (Meta, 2025) · Claude and Gemini undisclosed but believed similar scale.</p>
+  <p class="bg-source">Published anchors: GPT-1 117M (OpenAI, 2018) · Llama 3.1 405B dense (Meta, 2024) · Llama 4 Behemoth announced at ~2T total / ~288B active per token (Meta, 2025; MoE teacher model).</p>
 </section>

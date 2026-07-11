@@ -1,6 +1,6 @@
 <section data-background-color="#06080F">
-  <h2>So how does the model's weight matrix get <span class="accent phos">filled in</span>?</h2>
-  <p class="small muted" style="margin-top:-0.4em;">Nobody types in a trillion numbers. They get <strong>learned</strong> from staggering amounts of text — by playing fill-in-the-blank, billions of times.</p>
+  <h2>So how do billions of weights get <span class="accent phos">learned</span>?</h2>
+  <p class="small muted" style="margin-top:-0.4em;">Nobody types them in. Training repeatedly predicts the <strong>next token</strong>, measures the error, and uses that signal to adjust the model.</p>
 
   <style>
     .train-flow {
@@ -125,46 +125,46 @@
   <div class="train-flow mt-1">
     <div class="train-step">
       <div class="ts-num">Step 01 · Gather</div>
-      <div class="ts-title">Collect the internet</div>
+      <div class="ts-title">Build a training mixture</div>
       <div class="ts-body">
-        Pull <strong>~15+ trillion words</strong> of human text: web pages, books, Wikipedia, scientific papers, GitHub code, forum posts. Clean it, dedupe it, filter junk.
+        Combine and filter public, licensed, human-created, and synthetic data. Llama 3 disclosed about <strong>15 trillion tokens</strong> — subword chunks, not words.
       </div>
-      <div class="ts-stat">≈ 50,000× all of Wikipedia</div>
+      <div class="ts-stat">dedupe · filter · tokenize</div>
     </div>
 
     <div class="train-step ts-cyan">
       <div class="ts-num">Step 02 · Predict</div>
-      <div class="ts-title">Play fill-in-the-blank</div>
+      <div class="ts-title">Predict what comes next</div>
       <div class="ts-body">
-        Show the model a piece of real text with the next word hidden. Ask it to guess. <strong>That's it. That's the whole game.</strong>
-        <div class="nt-example">"The cat sat on the <span class="blank">___</span>" → <span class="guess">mat</span></div>
+        Give the model all earlier tokens and ask for the next one. It cannot look ahead.
+        <div class="nt-example">"The cat sat on the" → predict <span class="guess">" mat"</span></div>
       </div>
-      <div class="ts-stat">repeated trillions of times</div>
+      <div class="ts-stat">causal next-token objective</div>
     </div>
 
     <div class="train-step ts-amber">
       <div class="ts-num">Step 03 · Adjust</div>
       <div class="ts-title">Nudge the weights</div>
       <div class="ts-body">
-        Wrong guess? Every number in the matrix gets bumped a tiny bit — in the direction that would have made the answer <em>less</em> wrong. Statistics, not understanding.
+        Backpropagation assigns credit for the error; an optimizer nudges many weights toward a less-wrong prediction. Repeat across enormous batches.
       </div>
-      <div class="ts-stat">≈ trillions of tiny nudges</div>
+      <div class="ts-stat">loss → gradients → optimizer</div>
     </div>
 
     <div class="train-step ts-violet">
       <div class="ts-num">Step 04 · Refine</div>
-      <div class="ts-title">Polish with humans</div>
+      <div class="ts-title">Turn it into an assistant</div>
       <div class="ts-body">
-        After the base model knows language statistically, humans rate its answers (helpful? safe? honest?). The weights get nudged one more time to behave like an assistant, not an autocomplete.
+        Demonstrations teach instruction-following. Preference data, model feedback, and verifiable rewards shape helpfulness, safety, and reasoning.
       </div>
-      <div class="ts-stat">RLHF + instruction tuning</div>
+      <div class="ts-stat">SFT · preference/RL training</div>
     </div>
   </div>
 
   <div class="train-key">
     <div class="tk-label">⚡ Scale</div>
-    <div>A single frontier training run: <strong>~tens of thousands of GPUs</strong> running <strong>weeks to months</strong>, costing <strong>$100M+</strong>. The "weights" are the leftover residue — every statistical pattern in human language, compressed into a trillion numbers.</div>
+    <div>Published frontier runs use <strong>tens of thousands of accelerators</strong> for <strong>weeks to months</strong>. Exact cost and data mixtures are usually undisclosed. Once training ends, deployed weights are normally <strong>frozen during a conversation</strong>.</div>
   </div>
 
-  <p class="bg-source">Llama 3 trained on ~15T tokens · GPT-4 reportedly $100M+ compute · Modern frontier runs: 25K–100K+ H100/B200 GPUs for months.</p>
+  <p class="bg-source">Sources: Meta, <em>The Llama 3 Herd of Models</em> (2024) · OpenAI InstructGPT (2022) · Meta Llama 4 announcement (2025). Tokens ≠ words; pretraining ≠ post-training.</p>
 </section>

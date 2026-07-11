@@ -1,11 +1,14 @@
 <section>
   <span class="interactive-badge">animated</span>
-  <h2>MCP servers &amp; Skills — giving models hands</h2>
-  <p class="small muted" style="margin-top:-0.4em;">The model is the <em>brain</em>. MCP servers are the <em>hands and senses</em>. Open standard from Anthropic (Nov 2024), now adopted by OpenAI, Google, GitHub, and <strong>20,000+</strong> public servers (mcp.so registry, 2026).</p>
+  <div class="section-kicker">SECTION IV · THE NEW PLUMBING</div>
+  <h2>MCP — a shared protocol for tools and data</h2>
+  <p class="small muted" style="margin-top:-0.4em;">The model supplies reasoning; external software supplies access. Anthropic introduced MCP in Nov 2024, and it is now supported across major model and developer platforms. Public registries list <strong>thousands</strong> of servers — counts vary by registry and verification method.</p>
 
   <div class="mcp-hub mt-2">
     <div class="mcp-svg-wrap">
-      <svg class="mcp-svg" viewBox="0 0 540 400" xmlns="http://www.w3.org/2000/svg">
+      <svg class="mcp-svg" viewBox="0 0 540 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mcp-title mcp-desc">
+        <title id="mcp-title">MCP hub connecting an AI model to tools and data</title>
+        <desc id="mcp-desc">The AI model connects through a shared protocol to GitHub, Slack, files, a database, email, and a browser.</desc>
         <g class="mcp-edge" data-spoke="0"><line x1="270" y1="200" x2="100" y2="80"/></g>
         <g class="mcp-edge" data-spoke="1"><line x1="270" y1="200" x2="440" y2="80"/></g>
         <g class="mcp-edge" data-spoke="2"><line x1="270" y1="200" x2="60"  y2="200"/></g>
@@ -15,8 +18,8 @@
 
         <g class="mcp-hub-center">
           <circle cx="270" cy="200" r="64"/>
-          <text x="270" y="192" class="mcp-center-label">AI</text>
-          <text x="270" y="214" class="mcp-center-label small">model</text>
+          <text x="270" y="188" class="mcp-center-label">AI</text>
+          <text x="270" y="220" class="mcp-center-label small">MODEL</text>
         </g>
 
         <g class="mcp-spoke" data-spoke="0"><circle cx="100" cy="80"  r="42"/><text x="100" y="80">GitHub</text></g>
@@ -29,18 +32,18 @@
       <div class="mcp-label">Model Context Protocol — one socket, many tools.</div>
     </div>
 
-    <div>
+    <div class="mcp-copy">
       <h3 class="c-violet">MCP server</h3>
-      <p>A tiny program that exposes <strong>tools</strong> (do something), <strong>resources</strong> (read something), and <strong>prompts</strong> to any AI client. Same wire format whether you're hitting Slack or your local filesystem.</p>
+      <p>A program that exposes <strong>tools</strong> (do something), <strong>resources</strong> (read something), and <strong>prompts</strong> through a shared protocol. Authentication and least privilege still matter: an MCP server is software you must trust.</p>
 
-      <h3 class="c-violet mt-2">Skill</h3>
-      <p>A pre-packaged <em>instruction set</em> the model can load on demand — "how to write good unit tests," "how to follow this team's code style," "how to file an incident report." Think of it as muscle memory the model can swap in.</p>
+      <h3 class="c-violet mt-2">What it standardizes</h3>
+      <p>The client discovers capabilities, sends structured requests, and receives structured results. The same protocol can sit in front of GitHub, a database, or a local filesystem.</p>
 
-      <div class="callout violet mt-2">
-        Together: the model brings <strong>reasoning</strong>. MCP brings <strong>reach</strong>. Skills bring <strong>specialization</strong>. That's how a generic chatbot becomes "my company's AI."
+      <div class="callout amber mt-1">
+        <strong>Standardized does not mean safe by default.</strong> Tool descriptions and returned data can be malicious. Use trusted servers, explicit consent, narrow permissions, and audit logs.
       </div>
     </div>
   </div>
 
-  <p class="bg-source">Spec: <code>modelcontextprotocol.io</code> · Skills: Claude Code Skills built on the open <code>agentskills.io</code> standard (Anthropic, Oct 2025); GitHub Copilot Skillsets.</p>
+  <p class="bg-source">Sources: modelcontextprotocol.io · Anthropic MCP announcement (Nov 2024). Ecosystem counts vary by registry and verification method.</p>
 </section>

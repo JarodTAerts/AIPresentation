@@ -1,7 +1,7 @@
-<section>
+<section class="tiny-transformer-slide">
   <span class="interactive-badge">interactive</span>
-  <h2>A toy transformer — spelling "CAT"</h2>
-  <p class="small muted" style="margin-top:-0.4em;">A real transformer is millions of these multiplications stacked. Ours is one: a 2×2 weight matrix <code>R</code> and a 2-number state. Click <strong>Predict next token</strong> and watch the math walk us around the circle: <code>START → C → A → T</code>.</p>
+  <h2>A real tiny transformer — <span class="accent phos">CAT</span> vs. <span class="accent amber">BAD</span></h2>
+  <p class="small muted" style="margin-top:-0.4em;">Both prefixes end in <code>A</code>. To predict <code>T</code> or <code>D</code>, the model must use <strong>causal attention</strong> to look back at <code>C</code> or <code>B</code>. Every learned projection in this one-head model is 2×2.</p>
 
   <div id="toy-transformer" class="mt-2"><!-- built by widgets.js --></div>
 </section>

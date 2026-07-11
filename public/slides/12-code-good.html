@@ -1,25 +1,22 @@
-<section>
+<section class="code-evidence-slide">
   <span class="eyebrow amber">why code first</span>
-  <h2>Code is just structured language with a brutally fast grader.</h2>
+  <h2>Why code moved first</h2>
 
-  <div class="two-col mt-2">
+  <div class="two-col mt-1">
     <div>
       <h3 class="c-amber">Code is text…</h3>
-      <p>Same input format as English. The model already knows how to predict the next token. There are <strong>500M+ public repositories</strong> on GitHub to learn from (Octoverse 2024).</p>
+      <p>Same token-prediction format as English, but with unusually regular structure. GitHub reported <strong>518M total projects</strong> across open-source, public, and private repositories (Octoverse 2024).</p>
 
-      <h3 class="c-amber mt-2">…with an grader</h3>
-      <p>Did the code compile? Did the tests pass? <strong>Instant, automatic feedback.</strong> Essays don't have that. This is why models trained on code got dramatically smarter at <em>everything</em> — reasoning, math, even writing.</p>
+      <h3 class="c-amber mt-2">…with a fast grader</h3>
+      <p>Did it parse, compile, and pass tests? <strong>Executable feedback</strong> makes code unusually useful for training and evaluating reasoning — though no single data source explains every capability gain.</p>
     </div>
     <div>
-      <div class="chart-wrap" style="height: 340px;">
-        <canvas id="swebench-chart"></canvas>
+      <div class="chart-wrap" style="height: 280px;">
+        <canvas id="swebench-chart" role="img" aria-label="Selected published SWE-bench Verified system scores from August 2024 to February 2026"></canvas>
       </div>
-      <p class="small muted center" style="margin-top:0.4em;">SWE-bench Verified — % of real GitHub issues solved autonomously</p>
-      <p class="bg-source center">Source: <code>swebench.com/verified</code> leaderboard, snapshots Mar 2024 → Feb 2026.</p>
+      <p class="small muted center" style="margin-top:0.4em;">SWE-bench Verified — selected published agent systems, pass@1</p>
+      <p class="bg-source center">Sources: OpenAI Verified launch (Aug 2024), Anthropic system cards, leaderboard snapshots. Models and scaffolds differ.</p>
     </div>
   </div>
 
-  <div class="callout amber mt-2">
-    In ~24 months, frontier models went from <strong>~13%</strong> on the original SWE-bench (Mar 2024) to <strong>65–75%</strong> on the newer SWE-bench Verified (introduced Aug 2024). No other knowledge-work benchmark has moved that fast.
-  </div>
 </section>

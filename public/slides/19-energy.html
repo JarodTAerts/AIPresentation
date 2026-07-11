@@ -1,14 +1,14 @@
-<section>
+<section class="energy-slide">
   <span class="interactive-badge">interactive</span>
   <h2>Energy — every query costs power.</h2>
-  <p class="small muted" style="margin-top:-0.4em;">Move the slider. A single query is small. A billion queries a day adds up.</p>
+  <p class="small muted" style="margin-top:-0.4em;">Move the slider. This is a transparent <strong>inference-compute estimate</strong>, not a universal measurement: model, prompt length, hardware, utilization, and data-center overhead all matter.</p>
 
   <div id="energy-widget" class="mt-2"><!-- built by widgets.js --></div>
 
-  <p class="bg-source">~0.3 Wh per typical ChatGPT-class query (Epoch AI 2025 revision — 10× lower than the older 3 Wh estimate; long-context or reasoning tasks can exceed 5–40 Wh). U.S. home avg ≈ 30 kWh/day (EIA). Grid intensity ≈ 0.35 kg CO₂/kWh (EPA eGRID 2023).</p>
+  <p class="bg-source">Estimate: ~0.3 Wh for a typical GPT-4o-class query (Epoch AI, Feb 2025); heavy long-context/reasoning workloads can be much higher. Household and grid comparisons use U.S. averages.</p>
 
-  <div class="callout amber mt-2">
-    <strong>Why it matters for utility bills:</strong> in <strong>PJM</strong> (Mid-Atlantic, ~67M residents), the 2025/26 capacity auction cleared <strong>9× higher</strong> than the prior year — already adding <strong>~$25–30/month</strong> to residential bills. <strong>ERCOT</strong> (Texas) has absorbed similar data-center load growth without a comparable price spike due to its different market design. Several states now let hyperscalers <em>directly contract</em> with nuclear &amp; gas plants — at prices the public market can't match.
-    <span class="bg-source" style="display:block;margin-top:0.5em;">Sources: PJM 2025/26 Base Residual Auction; SemiAnalysis "AI data center power bills"; EIA AEO 2026.</span>
+  <div class="callout amber mt-1">
+    <strong>Data centers affect bills through the grid, not through one prompt.</strong> In PJM, capacity prices jumped about <strong>9×</strong> as data-center demand rose alongside plant retirements and transmission limits. Residential effects vary by utility — generally a few dollars per month, not a universal $25–30.
+    <span class="bg-source" style="display:block;margin-top:0.5em;">Sources: official PJM 2025/26 Base Residual Auction report; EIA; utility/regulator estimates.</span>
   </div>
 </section>
