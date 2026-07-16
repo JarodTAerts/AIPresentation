@@ -350,7 +350,7 @@
 }
 #arch-diagram .arch-lane-label {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   fill: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -358,13 +358,14 @@
 #arch-diagram .arch-node rect {
   fill: var(--bg-3);
   stroke: var(--line);
-  stroke-width: 1;
+  stroke-width: 1.2;
   rx: 6; ry: 6;
   transition: fill 0.18s, stroke 0.18s;
 }
 #arch-diagram .arch-node text {
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 14.5px;
+  font-weight: 500;
   fill: var(--ink);
   text-anchor: middle;
   dominant-baseline: middle;
@@ -378,8 +379,8 @@
   cursor: pointer;
 }
 #arch-diagram .arch-node:focus { outline: none; }
-#arch-diagram .arch-edge { stroke: var(--line); stroke-width: 1.2; fill: none; opacity: 0.7; }
-#arch-diagram .arch-edge.flow { stroke: var(--phosphor); stroke-dasharray: 4 6; animation: archFlow 1.6s linear infinite; }
+#arch-diagram .arch-edge { stroke: var(--line); stroke-width: 1.8; fill: none; opacity: 0.7; }
+#arch-diagram .arch-edge.flow { stroke: var(--phosphor); stroke-width: 2; stroke-dasharray: 5 7; animation: archFlow 1.6s linear infinite; }
 @keyframes archFlow { to { stroke-dashoffset: -20; } }
 
 #arch-diagram .arch-pop {
@@ -578,7 +579,7 @@
 }
 
 /* ---------- Bullet-pop list (sequentially fade in) ---------- */
-.pop-list { list-style: none; padding: 0; margin: 0; }
+.pop-list { list-style: none !important; padding: 0 !important; margin: 0 !important; }
 .pop-list li {
   margin: 0.5em 0;
   padding: 0.55em 0.85em;
@@ -751,19 +752,19 @@
   justify-content: center;
 }
 #matmul-explainer .mmx-vlbl-row .mmx-vlbl {
-  width: 78px;
+  width: 88px;
   text-align: center;
 }
 #matmul-explainer .mmx-vrow { display: flex; align-items: center; gap: 0.5em; }
 #matmul-explainer .mmx-vcell {
   display: inline-block;
-  width: 78px;
+  width: 88px;
   box-sizing: border-box;
   text-align: center;
   background: var(--bg-0);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 0.55em 0.45em;
+  padding: 0.55em 0.3em;
   color: var(--phosphor);
   font-family: var(--mono);
   font-size: 0.95em;
@@ -929,14 +930,30 @@
   color: var(--phosphor);
   margin-bottom: 0.4em;
 }
+#toy-transformer[data-math-open="1"] #tt-focus {
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#toy-transformer #tt-focus::-webkit-scrollbar { width: 7px; }
+#toy-transformer #tt-focus::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
 #toy-transformer .tt-prompt {
-  display: grid;
-  place-items: center;
-  min-height: 145px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
   padding: 0 1.2em;
   color: var(--ink-soft);
   text-align: center;
+  font-size: 0.72em;
   line-height: 1.55;
+}
+#toy-transformer .tt-prompt p {
+  margin: 0;
+  max-width: 32ch;
 }
 #toy-transformer .tt-table {
   display: grid;
@@ -1210,11 +1227,140 @@
   font-size: 0.61em;
 }
 #toy-transformer .tt-mask-word { color: var(--rose); font-weight: 600; }
+#toy-transformer .tt-pipeline.three { grid-template-columns: repeat(3, 1fr); }
+#toy-transformer .tt-simple { display: flex; flex-direction: column; gap: 0.55em; }
+#toy-transformer .tt-simple-lead {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.72em;
+  line-height: 1.5;
+  text-align: center;
+}
+#toy-transformer .tt-simple-embed {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4em;
+}
+#toy-transformer .tt-simple-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.25em 0.5em;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-2);
+}
+#toy-transformer .tt-simple-letter {
+  width: 1.5em;
+  height: 1.5em;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  background: var(--bg-3);
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.8em;
+}
+#toy-transformer .tt-simple-arrow { color: var(--muted); font-family: var(--mono); font-size: 0.75em; }
+#toy-transformer .tt-attn-bars { display: grid; gap: 0.5em; padding: 0.2em 0.3em; }
+#toy-transformer .tt-attn-row {
+  display: grid;
+  grid-template-columns: 6.6em 1fr 2.4em;
+  gap: 0.5em;
+  align-items: center;
+}
+#toy-transformer .tt-attn-label {
+  font-family: var(--mono);
+  font-size: 0.6em;
+  color: var(--ink-soft);
+  text-align: right;
+}
+#toy-transformer .tt-attn-row.hot .tt-attn-label { color: var(--phosphor); }
+#toy-transformer .tt-attn-track {
+  height: 15px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-0);
+  overflow: hidden;
+}
+#toy-transformer .tt-attn-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cyan);
+  transition: width 0.45s ease;
+}
+#toy-transformer .tt-attn-row.hot .tt-attn-fill { background: var(--phosphor); }
+#toy-transformer .tt-attn-val {
+  font-family: var(--mono);
+  font-size: 0.68em;
+  color: var(--ink);
+  text-align: right;
+}
+#toy-transformer .tt-simple-verdict {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 0.45em 0.6em;
+  border: 1px solid var(--amber-d);
+  border-radius: 9px;
+  background: rgba(242,182,90,0.08);
+}
+#toy-transformer .tt-simple-seq { font-family: var(--mono); font-weight: 700; color: var(--ink-soft); font-size: 0.85em; }
+#toy-transformer .tt-simple-answer {
+  width: 1.7em;
+  height: 1.7em;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--amber-d);
+  background: rgba(242,182,90,0.14);
+  color: var(--amber);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+#toy-transformer .tt-simple-prob { font-family: var(--mono); font-size: 0.65em; color: var(--amber); }
+#toy-transformer .tt-math-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.5em;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+#toy-transformer .tt-math-toggle input { accent-color: var(--phosphor); cursor: pointer; }
+#toy-transformer .tt-math-detail {
+  margin-top: 0.6em;
+  padding-top: 0.55em;
+  border-top: 1px dashed var(--line);
+}
+#toy-transformer .tt-math-detail-label {
+  display: block;
+  margin-bottom: 0.45em;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.5em;
+  color: var(--violet);
+  text-align: center;
+}
 #toy-transformer .controls-actions {
   margin-top: 0;
+  flex-wrap: wrap;
+  row-gap: 0.5em;
 }
+#toy-transformer .controls-actions .btn { white-space: nowrap; }
+#toy-transformer .tt-math-toggle { white-space: nowrap; }
 #toy-transformer .tt-step-count {
   margin-left: auto;
+  white-space: nowrap;
 }
 #toy-transformer .tt-story {
   display: flex;
@@ -1266,6 +1412,11 @@
   right: -0.55em;
   color: var(--phosphor);
   z-index: 2;
+}
+#toy-transformer .tt-pipeline span.is-active {
+  background: rgba(91,233,185,0.16);
+  color: var(--phosphor);
+  box-shadow: inset 0 0 0 1px var(--phosphor-d);
 }
 #toy-transformer .tt-probabilities {
   display: grid;
@@ -1457,8 +1608,26 @@
   background: var(--bg-2);
 }
 .ai-art-slide .art-card.labor { border-left-color: var(--rose); }
+.ai-art-slide .art-card.instant { border-left-color: var(--amber); }
+.ai-art-slide .art-card.deepfake { border-left-color: var(--rose); }
 .ai-art-slide .art-card.identity { border-left-color: var(--amber); }
 .ai-art-slide .art-card.access { border-left-color: var(--cyan); }
+.ai-art-slide .art-tag {
+  display: inline-block;
+  margin-left: 0.4em;
+  padding: 0.05em 0.55em;
+  border-radius: 999px;
+  font-size: 0.62em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+.ai-art-slide .art-tag.bad {
+  background: rgba(240,138,138,0.15);
+  border: 1px solid var(--rose);
+  color: var(--rose);
+}
 .ai-art-slide .art-icon { flex: 0 0 auto; font-size: 1.35em; line-height: 1; }
 .ai-art-slide .art-title {
   margin-bottom: 0.25em;
@@ -1478,7 +1647,7 @@
 .tiny-system-slide h2 { margin-bottom: 0.3em; }
 .tiny-system-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.95fr 1fr;
+  grid-template-columns: 0.92fr 1.08fr 1fr;
   gap: 0.75em;
   align-items: stretch;
   height: 500px;
@@ -1570,6 +1739,11 @@
   grid-template-rows: 1fr 1fr;
   gap: 0.75em;
 }
+.tiny-system-middle .tiny-system-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 .position-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1655,6 +1829,45 @@
   background: rgba(181,151,240,0.07);
 }
 .tiny-architecture em { color: var(--violet); font-style: normal; font-weight: 600; }
+.tiny-inside {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  justify-content: center;
+  flex: 1;
+}
+.tiny-inside .ti-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5em;
+  align-items: center;
+  padding: 0.5em 0.6em;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bg-0);
+}
+.tiny-inside .ti-item.is-key {
+  border-color: var(--phosphor);
+  box-shadow: 0 0 0 1px rgba(91,233,185,0.14);
+  background: rgba(91,233,185,0.05);
+}
+.tiny-inside .ti-num {
+  width: 1.7em;
+  height: 1.7em;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  border: 1px solid var(--phosphor-d);
+  background: rgba(91,233,185,0.1);
+  color: var(--phosphor);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.72em;
+}
+.tiny-inside .ti-item > div { display: grid; gap: 0.12em; }
+.tiny-inside .ti-item strong { color: var(--ink); font-size: 0.62em; line-height: 1.2; }
+.tiny-inside .ti-item span { color: var(--ink-soft); font-size: 0.5em; line-height: 1.4; }
+.tiny-inside .ti-item em { color: var(--phosphor); font-style: normal; font-weight: 600; }
 .tiny-system-callout {
   display: flex;
   gap: 0.65em;
@@ -1697,6 +1910,10 @@
   box-shadow: 0 0 16px rgba(240,138,138,0.22);
 }
 .w-pill.is-active .w-pill-value { color: var(--rose); }
+#wealth-widget .stat-row { margin-top: 0.55em; }
+#wealth-widget .stat { padding: 0.5em 0.8em; }
+#wealth-widget .stat .stat-value { font-size: 1.15em; }
+#wealth-widget #w-desc { min-height: 58px; margin-top: 0.55em; }
 
 /* ---------- Slide 5 (mood mixer) tweaks — pill-shaped editable cells ---------- */
 .mm-matrix td input[type="number"] {

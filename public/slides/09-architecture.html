@@ -91,8 +91,17 @@
         <rect x="680" y="420" width="200" height="32"/><text x="780" y="436">Curated feedback</text>
       </g>
 
-      <!-- A few connecting edges (left intentionally sparse) -->
-      <path class="arch-edge flow" d="M320,147 C420,170 460,180 550,190"/>
+      <!-- Inputs load into the pre-model layer -->
+      <path class="arch-edge flow" d="M205,76 C235,90 300,92 318,104"/>
+      <path class="arch-edge flow" d="M405,76 C455,90 545,92 575,104"/>
+      <path class="arch-edge flow" d="M605,76 C600,88 590,97 583,104"/>
+      <path class="arch-edge flow" d="M820,76 C828,88 836,97 840,104"/>
+      <!-- ...then the pre-model layer into the foundation model -->
+      <path class="arch-edge flow" d="M320,147 C355,165 410,178 445,190"/>
+      <path class="arch-edge flow" d="M580,147 C576,165 565,178 560,190"/>
+      <path class="arch-edge flow" d="M840,147 C795,168 720,180 685,190"/>
+      <!-- Model row + downstream flow -->
+      <path class="arch-edge flow" d="M750,214 L780,214"/>
       <path class="arch-edge flow" d="M750,220 C800,250 250,270 210,270"/>
       <path class="arch-edge flow" d="M550,250 L550,270"/>
       <path class="arch-edge flow" d="M550,312 C530,330 410,340 390,350"/>

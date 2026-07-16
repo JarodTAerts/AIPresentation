@@ -480,7 +480,7 @@ const TT_MODEL = {
   ff1: [[-0.432111, 0.581963], [-0.234796, 0.464147]],
   ff2: [[-0.729627, -1.432304], [-0.843985, -0.430868]],
 };
-const TT_STATE = { prefix: 'CA', phase: 0 };
+const TT_STATE = { prefix: 'CA', phase: 0, showMath: false };
 
 function ttDot(a, b) {
   return a.reduce((sum, value, i) => sum + value * b[i], 0);
@@ -678,6 +678,59 @@ function ttPredictionHtml(result, target, other) {
     <p class="tt-caption">${ttVectorHtml(finalState)} · ${ttVectorHtml(TT_MODEL.embeddings[targetIndex])} = <strong>${ttFmt(result.logits[targetIndex])}</strong>. Softmax converts all five token scores into probabilities, so <strong>${target}</strong> wins.</p>`;
 }
 
+function ttEmbedSimpleHtml(result) {
+  return `
+    <div class="tt-simple">
+      <p class="tt-simple-lead">Each letter has a fixed <strong>list of numbers</strong> the model learned — its "word-vector." (Position, where the letter sits, is folded in too.)</p>
+      <div class="tt-simple-embed">
+        ${result.labels.map((label, i) => `
+          <div class="tt-simple-chip">
+            <span class="tt-simple-letter">${label}</span>
+            <span class="tt-simple-arrow">→</span>
+            ${ttVectorHtml(result.x[i])}
+          </div>`).join('')}
+      </div>
+      <p class="tt-caption">You don't need to read the numbers — the model does. The point: every letter is now a handful of numbers it can mix.</p>
+    </div>`;
+}
+function ttAttentionSimpleHtml(result) {
+  const weights = result.attention[1];
+  const first = result.labels[0];
+  const pctFirst = Math.round(weights[0] * 100);
+  const pctA = Math.round(weights[1] * 100);
+  return `
+    <div class="tt-simple">
+      <p class="tt-simple-lead">The last letter <strong>A</strong> looks back at the earlier letters and decides which one matters. That choice is <strong>attention</strong>.</p>
+      <div class="tt-attn-bars">
+        <div class="tt-attn-row hot">
+          <span class="tt-attn-label">look back at ${first}</span>
+          <span class="tt-attn-track"><span class="tt-attn-fill" style="width:${Math.max(2, pctFirst)}%"></span></span>
+          <span class="tt-attn-val">${pctFirst}%</span>
+        </div>
+        <div class="tt-attn-row">
+          <span class="tt-attn-label">stay on A</span>
+          <span class="tt-attn-track"><span class="tt-attn-fill" style="width:${Math.max(2, pctA)}%"></span></span>
+          <span class="tt-attn-val">${pctA}%</span>
+        </div>
+      </div>
+      <p class="tt-caption">Without attention, <code>CA</code> and <code>BA</code> look identical — both end in <code>A</code>. Looking back at <strong>${first}</strong> is what lets the model tell them apart.</p>
+    </div>`;
+}
+function ttPredictSimpleHtml(result, target, other) {
+  const first = result.labels[0];
+  const targetProb = result.probabilities[TT_TOKENS.indexOf(target)];
+  return `
+    <div class="tt-simple">
+      <p class="tt-simple-lead">Having pulled in <strong>${first}</strong>, the model scores all five possible next letters and picks the best fit.</p>
+      <div class="tt-simple-verdict">
+        <span class="tt-simple-seq">${result.labels[0]} ${result.labels[1]} →</span>
+        <span class="tt-simple-answer">${target}</span>
+        <span class="tt-simple-prob">${(targetProb * 100).toFixed(0)}% sure</span>
+      </div>
+      <p class="tt-caption"><code>${first}A</code> leads to <strong>${target}</strong>; the other prefix would lead to <strong>${other}</strong>. Same last letter, different answer — because attention looked back.</p>
+    </div>`;
+}
+
 function renderToyTransformer() {
   const root = document.getElementById('toy-transformer');
   if (!root || root.dataset.built) return;
@@ -696,24 +749,25 @@ function renderToyTransformer() {
           <div id="tt-focus" aria-live="polite"></div>
         </div>
         <div class="controls-actions">
-          <button class="btn" id="tt-step" type="button" data-step-btn>Start with token vectors →</button>
+          <button class="btn" id="tt-step" type="button" data-step-btn>Start →</button>
           <button class="btn ghost" id="tt-reset" type="button">Reset</button>
-          <span class="tt-step-count" id="tt-step-count">step 0 / 5</span>
+          <label class="tt-math-toggle"><input type="checkbox" id="tt-math"> Show the math</label>
+          <span class="tt-step-count" id="tt-step-count">step 0 / 3</span>
         </div>
       </div>
       <div class="tt-story">
         <div class="tt-story-card">
-          <div class="tt-story-title">Why attention is necessary</div>
-          <p>In both examples the latest token is <code>A</code>. A last-token-only model sees the same input twice. Attention lets <code>A</code> retrieve the earlier letter.</p>
+          <div class="tt-story-title">Why a transformer is different</div>
+          <p>Travis's brain was a single linear step — it only reacts to the current input. A transformer also <strong>looks back</strong> at earlier tokens and works them into the prediction, so the next token is more accurate. Here the latest letter is <code>A</code> in both cases — so it is the <strong>first</strong> letter that tells us everything.</p>
         </div>
-        <div class="tt-pipeline" aria-label="Tiny transformer pipeline">
-          <span>embed tokens</span><span>score attention</span><span>mix context</span><span>residual + MLP</span><span>score tokens</span>
+        <div class="tt-pipeline three" aria-label="Tiny transformer pipeline">
+          <span>embed the letters</span><span>look back (attention)</span><span>predict the letter</span>
         </div>
         <div class="tt-result-card">
-          <div class="tt-story-title">Next-token probabilities</div>
+          <div class="tt-story-title">Next-letter probabilities</div>
           <div id="tt-probabilities" class="tt-probabilities" aria-live="polite"></div>
         </div>
-        <p class="tt-model-note">Five tokens · one layer · one attention head · 2D embeddings · tied output head · trained on <code>CA→T</code> and <code>BA→D</code></p>
+        <p class="tt-model-note">Five letters · one attention layer · trained on <code>CA→T</code> and <code>BA→D</code> · about 42 learned numbers</p>
       </div>
     </div>`;
   refreshToyTransformer();
@@ -726,65 +780,73 @@ function refreshToyTransformer() {
   const target = TT_STATE.prefix === 'CA' ? 'T' : 'D';
   const other = target === 'T' ? 'D' : 'T';
   const phase = TT_STATE.phase;
+  const showMath = TT_STATE.showMath;
+  root.dataset.mathOpen = showMath ? '1' : '';
   const focus = document.getElementById('tt-focus');
   const kicker = document.getElementById('tt-focus-kicker');
   const sequence = document.getElementById('tt-sequence');
   const step = document.getElementById('tt-step');
   const count = document.getElementById('tt-step-count');
   const probabilities = document.getElementById('tt-probabilities');
+  const mathToggle = document.getElementById('tt-math');
+  if (mathToggle) mathToggle.checked = showMath;
 
   root.querySelectorAll('.tt-prefix').forEach(button => {
     const active = button.dataset.prefix === TT_STATE.prefix;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', String(active));
   });
+
+  root.querySelectorAll('.tt-pipeline span').forEach((span, i) => {
+    span.classList.toggle('is-active', phase - 1 === i);
+  });
+
+  const revealed = phase === 3;
   sequence.innerHTML = `
     <span class="tt-token-chip">${result.labels[0]}</span>
     <span class="tt-token-chip">${result.labels[1]}</span>
     <span class="tt-token-arrow">→</span>
-    <span class="tt-token-chip predicted ${phase === 5 ? 'is-visible' : ''}">${phase === 5 ? target : '?'}</span>`;
+    <span class="tt-token-chip predicted ${revealed ? 'is-visible' : ''}">${revealed ? target : '?'}</span>`;
 
+  const weightsMatrix = ttMatrixHtml(result.attention, result.labels, result.labels, 'weights');
   const phaseContent = [
     {
       kicker: 'The challenge',
-      html: `<div class="tt-prompt">The current token is <strong>A</strong> in both cases. Which earlier token should change the answer?</div>`,
-      button: 'Start with token vectors →',
+      simple: `<div class="tt-prompt"><p>The current letter is <strong>A</strong> in both <code>CA</code> and <code>BA</code>. Which <em>earlier</em> letter should decide the answer?</p></div>`,
+      math: '',
+      button: 'Start →',
     },
     {
-      kicker: '1 · Embed the two tokens',
-      html: ttEmbeddingHtml(result),
-      button: 'Next: attention scores →',
+      kicker: '1 · Turn each letter into numbers',
+      simple: ttEmbedSimpleHtml(result),
+      math: ttEmbeddingHtml(result),
+      button: 'Next: look back →',
     },
     {
-      kicker: '2 · Compare queries with keys',
-      html: ttQueryKeyScoreHtml(result),
-      button: 'Next: softmax weights →',
+      kicker: '2 · Look back and pick what matters',
+      simple: ttAttentionSimpleHtml(result),
+      math: `${ttQueryKeyScoreHtml(result)}${weightsMatrix}`,
+      button: 'Next: predict →',
     },
     {
-      kicker: '3 · Turn scores into attention',
-      html: `${ttMatrixHtml(result.attention, result.labels, result.labels, 'weights')}<p class="tt-caption">The final <code>A</code> puts most of its attention on the first token: <strong>${result.labels[0]}</strong>.</p>`,
-      button: 'Next: build the contextual state →',
-    },
-    {
-      kicker: '4 · Mix context into A',
-      html: ttContextHtml(result),
-      button: 'Next: transform and predict →',
-    },
-    {
-      kicker: '5 · Transform and score every token',
-      html: ttPredictionHtml(result, target, other),
+      kicker: '3 · Predict the next letter',
+      simple: ttPredictSimpleHtml(result, target, other),
+      math: `${ttContextHtml(result)}${ttPredictionHtml(result, target, other)}`,
       button: 'Prediction complete',
     },
   ][phase];
 
   kicker.textContent = phaseContent.kicker;
-  focus.innerHTML = phaseContent.html;
+  focus.innerHTML = phaseContent.simple +
+    (showMath && phaseContent.math
+      ? `<div class="tt-math-detail"><span class="tt-math-detail-label">Under the hood</span>${phaseContent.math}</div>`
+      : '');
   step.textContent = phaseContent.button;
-  step.disabled = phase >= 5;
-  count.textContent = `step ${phase} / 5`;
+  step.disabled = phase >= 3;
+  count.textContent = `step ${phase} / 3`;
 
   const candidates = [
-    { token: target, probability: result.probabilities[TT_TOKENS.indexOf(target)], winner: phase === 5 },
+    { token: target, probability: result.probabilities[TT_TOKENS.indexOf(target)], winner: revealed },
     { token: other, probability: result.probabilities[TT_TOKENS.indexOf(other)], winner: false },
   ];
   probabilities.innerHTML = candidates.map(item => {
@@ -792,14 +854,14 @@ function refreshToyTransformer() {
     return `
       <div class="tt-prob-row ${item.winner ? 'winner' : ''}">
         <span class="tt-prob-token">${item.token}</span>
-        <span class="tt-prob-track"><span class="tt-prob-fill" style="width:${phase === 5 ? Math.max(1, pct) : 0}%"></span></span>
-        <span class="tt-prob-value">${phase === 5 ? pct.toFixed(1) + '%' : '—'}</span>
+        <span class="tt-prob-track"><span class="tt-prob-fill" style="width:${revealed ? Math.max(1, pct) : 0}%"></span></span>
+        <span class="tt-prob-value">${revealed ? pct.toFixed(1) + '%' : '—'}</span>
       </div>`;
   }).join('');
 }
 
 function stepToyTransformer() {
-  TT_STATE.phase = Math.min(5, TT_STATE.phase + 1);
+  TT_STATE.phase = Math.min(3, TT_STATE.phase + 1);
   refreshToyTransformer();
 }
 function resetToyTransformer() {
@@ -821,16 +883,273 @@ function wireToyTransformer() {
     if (event.target.closest('#tt-step')) stepToyTransformer();
     if (event.target.closest('#tt-reset')) resetToyTransformer();
   });
+  root.addEventListener('change', event => {
+    if (event.target.id === 'tt-math') {
+      TT_STATE.showMath = event.target.checked;
+      refreshToyTransformer();
+    }
+  });
 }
 
 // ============================================================
-//  Slide 7 — Zoom-out animation: tiny vector → published frontier scale
+//  Slide — Cosmic scale zoom: toy model → frontier scale
+//  "Powers of Ten" style continuous zoom. Each model is a glowing orb
+//  whose radius is proportional to its parameter count; the camera zooms
+//  out so each model fills the view in turn while earlier ones shrink to
+//  specks at the centre — the way planet→star→galaxy videos convey scale.
 // ============================================================
 let ZOOM_ANIM = null;
-let ZOOM_CACHE = null;   // { canvas: HTMLCanvasElement, caption: string } — set once the animation has played far enough
-let ZOOM_START = 0;
-let ZOOM_CAPTION_NOW = '';
-const ZOOM_CACHE_AFTER_MS = 11000;   // once past this, treat the visible animation as "done" enough to cache
+
+const ZOOM_MODELS = [
+  { name: 'Our toy transformer', params: 42,     year: 'this talk', color: [91, 233, 185] },
+  { name: 'GPT-1',               params: 117e6,  year: '2018',      color: [122, 217, 229] },
+  { name: 'GPT-2',               params: 1.5e9,  year: '2019',      color: [122, 217, 229] },
+  { name: 'GPT-3',               params: 175e9,  year: '2020',      color: [181, 151, 240] },
+  { name: 'Llama 3.1 405B',      params: 405e9,  year: '2024',      color: [242, 182, 90] },
+  { name: 'Llama 4 Behemoth',    params: 2e12,   year: '2025',      color: [240, 138, 138], holdMs: 10000 },
+  { name: "Today's frontier",    params: 1.2e13, year: '2025–26',   color: [190, 200, 255], undisclosed: true },
+];
+const ZOOM_LAST_KNOWN = 2e12;   // largest model with a published count (Llama 4)
+
+function zoomFmt(n) {
+  if (n >= 1e12) return (n / 1e12).toFixed(n < 1e13 ? 1 : 0) + ' trillion';
+  if (n >= 1e9)  return (n / 1e9).toFixed(n < 1e10 ? 1 : 0) + ' billion';
+  if (n >= 1e6)  return (n / 1e6).toFixed(n < 1e7 ? 1 : 0) + ' million';
+  if (n >= 1e3)  return (n / 1e3).toFixed(1) + ' thousand';
+  return Math.round(n).toString();
+}
+function zoomFmtMult(x) {
+  if (x >= 1e12) return '×' + (x / 1e12).toFixed(1) + ' trillion';
+  if (x >= 1e9)  return '×' + (x / 1e9).toFixed(1) + ' billion';
+  if (x >= 1e6)  return '×' + (x / 1e6).toFixed(1) + ' million';
+  if (x >= 1e3)  return '×' + (x / 1e3).toFixed(0) + ' thousand';
+  if (x >= 100)  return '×' + Math.round(x);
+  return '×' + x.toFixed(1);
+}
+function zoomStar(i, W, H) {
+  const rand = s => (((Math.sin(s) * 43758.5453) % 1) + 1) % 1;
+  return { x: rand(i * 12.9898) * W, y: rand(i * 78.233) * H, r: rand(i * 3.17) * 1.0 + 0.25 };
+}
+function zoomRng(seed) {
+  let s = seed >>> 0;
+  return function () {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+// Lazily build a small, deterministic node/edge "web" (unit-disk coords) per model
+// so each orb has a subtle neural texture that scales with it.
+function zoomWeb(i) {
+  const m = ZOOM_MODELS[i];
+  if (m._web) return m._web;
+  const N = Math.round(12 + i * i * 13);   // super-linear: big models form a dense cloud
+  const rng = zoomRng(i * 99991 + 17);
+  const GA = Math.PI * (3 - Math.sqrt(5));
+  const nodes = [];
+  for (let k = 0; k < N; k++) {
+    const rr = 0.86 * Math.sqrt((k + 0.5) / N);
+    const ang = k * GA + (rng() - 0.5) * 0.6;
+    nodes.push({ x: Math.cos(ang) * rr, y: Math.sin(ang) * rr, hub: rng() < 0.16 });
+  }
+  const seen = new Set();
+  const edges = [];
+  for (let a = 0; a < N; a++) {
+    let d1 = Infinity, i1 = -1, d2 = Infinity, i2 = -1;
+    for (let b = 0; b < N; b++) {
+      if (b === a) continue;
+      const dx = nodes[a].x - nodes[b].x, dy = nodes[a].y - nodes[b].y;
+      const d = dx * dx + dy * dy;
+      if (d < d1) { d2 = d1; i2 = i1; d1 = d; i1 = b; }
+      else if (d < d2) { d2 = d; i2 = b; }
+    }
+    for (const b of [i1, i2]) {
+      if (b < 0) continue;
+      const key = a < b ? a + ',' + b : b + ',' + a;
+      if (!seen.has(key)) { seen.add(key); edges.push([a, b]); }
+    }
+  }
+  m._web = { nodes, edges };
+  return m._web;
+}
+// Cached soft radial "glow" sprite per colour so nodes can be drawn additively
+// (overlapping glows bloom into a luminous cloud) without per-frame gradients.
+const ZOOM_GLOW_CACHE = {};
+function zoomGlow(color) {
+  const key = color.join(',');
+  if (ZOOM_GLOW_CACHE[key]) return ZOOM_GLOW_CACHE[key];
+  const S = 32, c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+  grd.addColorStop(0, `rgba(${color[0]},${color[1]},${color[2]},0.95)`);
+  grd.addColorStop(0.32, `rgba(${color[0]},${color[1]},${color[2]},0.42)`);
+  grd.addColorStop(1, `rgba(${color[0]},${color[1]},${color[2]},0)`);
+  g.fillStyle = grd; g.fillRect(0, 0, S, S);
+  ZOOM_GLOW_CACHE[key] = c;
+  return c;
+}
+
+// Draw one full frame of the scene for a given zoom level (worldScale = px per param).
+// Returns the index of the "featured" model so callers can update the caption.
+function zoomScene(ctx, W, H, TARGET_R, worldScale, elapsed) {
+  const cx = W / 2, cy = H / 2, minDim = Math.min(W, H);
+  const scaleParams = TARGET_R / worldScale;   // param count that fills the view right now
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06080F';
+  ctx.fillRect(0, 0, W, H);
+
+  // drifting starfield
+  for (let i = 0; i < 220; i++) {
+    const s = zoomStar(i, W, H);
+    const a = 0.28 + 0.32 * Math.sin(elapsed * 0.002 + i);
+    ctx.fillStyle = `rgba(150,190,220,${Math.max(0.06, a).toFixed(2)})`;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // featured model = nearest in log space to the current scale
+  let featured = 0, bestD = Infinity;
+  for (let i = 0; i < ZOOM_MODELS.length; i++) {
+    const d = Math.abs(Math.log(ZOOM_MODELS[i].params) - Math.log(scaleParams));
+    if (d < bestD) { bestD = d; featured = i; }
+  }
+
+  // orbs, largest first so tiny "history" specks render on top
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = ZOOM_MODELS.length - 1; i >= 0; i--) {
+    const m = ZOOM_MODELS[i];
+    const [cr, cg, cb] = m.color;
+    const sr = m.params * worldScale;   // on-screen radius, px
+
+    if (sr > minDim * 2.2) {
+      // too big to show as a ring — a looming next model tints the whole view
+      if (m.params < scaleParams * 80) {
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},0.05)`;
+        ctx.fillRect(0, 0, W, H);
+      }
+      continue;
+    }
+    if (sr < 1) {
+      // already passed — a bright speck of "history" at the centre
+      ctx.fillStyle = `rgba(${cr},${cg},${cb},0.85)`;
+      ctx.beginPath(); ctx.arc(cx, cy, 1.4, 0, Math.PI * 2); ctx.fill();
+      continue;
+    }
+
+    const focus = Math.exp(-Math.pow(Math.log(m.params) - Math.log(scaleParams), 2) / 0.9);
+    if (m.undisclosed) {
+      // hazy "nebula" for the undisclosed frontier — no crisp edge, dashed ring
+      const neb = ctx.createRadialGradient(cx, cy, 0, cx, cy, sr);
+      neb.addColorStop(0, `rgba(${cr},${cg},${cb},${(0.06 + 0.08 * focus).toFixed(3)})`);
+      neb.addColorStop(0.6, `rgba(${cr},${cg},${cb},${(0.04 + 0.06 * focus).toFixed(3)})`);
+      neb.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+      ctx.fillStyle = neb;
+      ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.fill();
+      ctx.setLineDash([7, 9]);
+      ctx.lineWidth = 1 + 1.2 * focus;
+      ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(0.20 + 0.40 * focus).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      continue;
+    }
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, sr);
+    glow.addColorStop(0, `rgba(${cr},${cg},${cb},${(0.09 + 0.11 * focus).toFixed(3)})`);
+    glow.addColorStop(0.72, `rgba(${cr},${cg},${cb},${(0.04 + 0.07 * focus).toFixed(3)})`);
+    glow.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.fill();
+
+    ctx.lineWidth = 1 + 1.8 * focus;
+    ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(0.30 + 0.55 * focus).toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.stroke();
+
+    if (sr < 7) {
+      ctx.fillStyle = `rgba(${cr},${cg},${cb},0.9)`;
+      ctx.beginPath(); ctx.arc(cx, cy, Math.max(1.2, sr * 0.7), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+
+  // internal "neural web" texture on prominent orbs — fades with focus so the
+  // scene never gets busy; only the model currently near screen-fill shows it.
+  for (let i = 0; i < ZOOM_MODELS.length; i++) {
+    const m = ZOOM_MODELS[i];
+    const sr = m.params * worldScale;
+    if (sr < 48 || sr > minDim * 1.7) continue;
+    const focus = Math.exp(-Math.pow(Math.log(m.params) - Math.log(scaleParams), 2) / 0.9);
+    if (focus < 0.14) continue;
+    const [cr, cg, cb] = m.color;
+    const web = zoomWeb(i);
+    const a = Math.min(1, focus);
+    const dens = web.nodes.length;
+    const nodeR = Math.max(0.7, 1.35 - dens * 0.0016);   // shrink dots as the cloud thickens
+    // faint mesh of connections (fades as density rises so it doesn't clutter)
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(0.15 * a * Math.max(0.45, 1 - dens * 0.0012)).toFixed(3)})`;
+    ctx.beginPath();
+    for (const [p, q] of web.edges) {
+      const n1 = web.nodes[p], n2 = web.nodes[q];
+      ctx.moveTo(cx + n1.x * sr, cy + n1.y * sr);
+      ctx.lineTo(cx + n2.x * sr, cy + n2.y * sr);
+    }
+    ctx.stroke();
+    // nodes drawn as additive glow sprites so dense clusters bloom into a cloud
+    ctx.globalCompositeOperation = 'lighter';
+    const glowSprite = zoomGlow(m.color);
+    const warmSprite = zoomGlow([255, 214, 150]);
+    const gN = Math.max(5, nodeR * 7);       // glow diameter, normal nodes
+    const gH = Math.max(9, nodeR * 12);      // glow diameter, hub nodes
+    for (const nd of web.nodes) {
+      const nx = cx + nd.x * sr, ny = cy + nd.y * sr;
+      if (nd.hub) {
+        ctx.globalAlpha = 0.55 * a;
+        ctx.drawImage(warmSprite, nx - gH / 2, ny - gH / 2, gH, gH);
+      } else {
+        ctx.globalAlpha = 0.36 * a;
+        ctx.drawImage(glowSprite, nx - gN / 2, ny - gN / 2, gN, gN);
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // HUD (top-left)
+  const undisclosedNow = scaleParams > ZOOM_LAST_KNOWN * 1.1;
+  const m = undisclosedNow ? ZOOM_MODELS[ZOOM_MODELS.length - 1] : ZOOM_MODELS[featured];
+  const [cr, cg, cb] = m.color;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#E6EDF3';
+  ctx.font = '700 34px "Inter", system-ui, sans-serif';
+  ctx.fillText(undisclosedNow ? '?  parameters' : zoomFmt(scaleParams) + ' parameters', 26, 50);
+  ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+  ctx.font = '600 21px "Inter", system-ui, sans-serif';
+  ctx.fillText(m.name + (m.year ? '   ·   ' + m.year : ''), 26, 82);
+  ctx.fillStyle = 'rgba(230,237,243,0.75)';
+  ctx.font = '500 15px "JetBrains Mono", monospace';
+  if (undisclosedNow) {
+    ctx.fillText('Claude · GPT-5 · Gemini — size undisclosed', 26, 108);
+  } else if (featured > 0) {
+    ctx.fillText(zoomFmtMult(m.params / ZOOM_MODELS[0].params) + ' the size of our toy model', 26, 108);
+  }
+  ctx.shadowBlur = 0;
+
+  const cap = document.getElementById('zoom-caption');
+  if (cap) {
+    cap.textContent = undisclosedNow
+      ? `${m.name} · ${m.year} — parameter count undisclosed (Claude, GPT-5, Gemini…)`
+      : `${m.name}${m.year ? ' · ' + m.year : ''} — ${zoomFmt(m.params)} parameters`;
+  }
+
+  return featured;
+}
+
 function startZoomOut() {
   const canvas = document.getElementById('zoom-canvas');
   if (!canvas) return;
@@ -839,257 +1158,50 @@ function startZoomOut() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const W = canvas.clientWidth, H = canvas.clientHeight;
   canvas.width = W * dpr; canvas.height = H * dpr;
-  ctx.scale(dpr, dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  // If we've already played the animation once this session, just paint the
-  // cached final frame and restore the caption — no re-animation.
-  if (ZOOM_CACHE && ZOOM_CACHE.canvas) {
-    ctx.drawImage(ZOOM_CACHE.canvas, 0, 0, W, H);
-    const cap = document.getElementById('zoom-caption');
-    if (cap && ZOOM_CACHE.caption) cap.textContent = ZOOM_CACHE.caption;
-    return;
+  const TARGET_R = Math.min(W, H) * 0.40;      // px radius when a model "fills" the view
+  const n = ZOOM_MODELS.length;
+  const logScaleFor = i => Math.log(TARGET_R / ZOOM_MODELS[i].params);
+
+  // Timeline: dwell on each model, then zoom to the next. Equal time per hop
+  // keeps a steady cadence of reveals even though the log-distances differ.
+  const HOLD = 1000, ZOOM = 1700, END_EXTRA = 4000;
+  const kf = [];
+  let t = 0;
+  kf.push([t, logScaleFor(0)]);
+  t += (ZOOM_MODELS[0].holdMs || HOLD); kf.push([t, logScaleFor(0)]);
+  for (let i = 1; i < n; i++) {
+    t += ZOOM; kf.push([t, logScaleFor(i)]);
+    t += (ZOOM_MODELS[i].holdMs || HOLD) + (i === n - 1 ? END_EXTRA : 0); kf.push([t, logScaleFor(i)]);
   }
-
-  // Each particle has a *parent* index — a previously-spawned particle in roughly
-  // the same neighborhood.  We draw a thin line between every particle and its
-  // parent to give the "neural web" feel.  Particles are spawned in the *outer
-  // ring* of the currently visible area so as we zoom out they always appear
-  // along the edge — leaving a uniformly populated universe behind us.
-  const parts = [];
-  const INITIAL_PARAMETERS = 42;
-  const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < INITIAL_PARAMETERS; i++) {
-    const radius = 0.12 + 0.68 * Math.sqrt((i + 0.5) / INITIAL_PARAMETERS);
-    const angle = i * GOLDEN_ANGLE;
-    parts.push({
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius,
-      hue: i / INITIAL_PARAMETERS,
-      anchor: false,
-      hub: i < 5,
-      born: -1000,
-      parent: -1,
-      parent2: -1,
-      pulseSeed: i,
-    });
-  }
-
-  // Spatial bucketing — used to find "nearby" parents quickly when we add new
-  // particles to grow the web.  Keyed by quantized (x, y) in model space.
-  const BUCKET_BITS = 0;  // unused — we keep track via a sliding window instead.
-
-  const labels = [
-    { t: 0.00, txt: '42 = 10 token + 4 position + 16 attention + 8 MLP + 4 normalization' },
-    { t: 0.20, txt: 'Scale up: larger vocabularies · wider vectors · more layers' },
-    { t: 0.45, txt: 'GPT-1 (2018): 117 million parameters' },
-    { t: 0.70, txt: 'Llama 3.1 (2024): 405 billion dense parameters' },
-    { t: 0.88, txt: 'Llama 4 Behemoth: ~2T total · ~288B active per token (MoE)' },
-  ];
+  const TOTAL = t;
+  const easeInOut = u => (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2);
+  const lsAt = tt => {
+    if (tt <= kf[0][0]) return kf[0][1];
+    for (let i = 1; i < kf.length; i++) {
+      if (tt <= kf[i][0]) {
+        const [ta, la] = kf[i - 1], [tb, lb] = kf[i];
+        if (tb === ta) return lb;
+        return la + (lb - la) * easeInOut((tt - ta) / (tb - ta));
+      }
+    }
+    return kf[kf.length - 1][1];
+  };
 
   const start = performance.now();
-  ZOOM_START = start;
-  const ZOOM_DURATION = 11000;      // hit max zoom after 11s (slower so it reads)
-  const TOTAL_DURATION = 26000;     // keep filling for ~15s after that
-  const R_FINAL = 140;
-  // Use the LARGER dimension so the universe fills the whole wide rectangle
-  // (not just an inscribed circle).  Diagonal factor is how far past the
-  // visible edge we still need to spawn to populate the corners.
-  const PX_PER_VR = Math.max(W, H) / 2 * 0.98;
-  const DIAG_FACTOR = Math.sqrt(W*W + H*H) / Math.max(W, H);  // ~1.12 for 2:1
-
-  // Target population given current view.  Floor is *very* low so we don't
-  // pre-seed a dense central cluster that turns into a solid blob once we
-  // zoom out.  Growth is quadratic in viewRadius (area scaling).
-  const MAX_PARTS = 35000;
-  function targetCount(viewRadius) {
-    // Effectively 0 below r≈3, then grows ~ r².
-    const ramp = Math.max(0, 2.4 * (viewRadius - 3) * (viewRadius - 3));
-    return Math.min(MAX_PARTS, Math.round(ramp));
-  }
-
-  // Per-frame spawn budget — generous so the web fills even on slow machines.
-  const SPAWN_PER_FRAME = 520;
-
   function frame(now) {
     const elapsed = now - start;
-    const tZoom = Math.min(1, elapsed / ZOOM_DURATION);
-    // Cubic ease-in: zoom accelerates outward.
-    const eased = tZoom * tZoom * tZoom;
-    const viewRadius = 1 + (R_FINAL - 1) * eased;
-
-    // Spawn budget split:
-    //   60% in the outer ring (0.62..1.15·viewRadius) → "expanding edge" feel
-    //   40% uniformly across the whole disk via sqrt-area sampling so density
-    //       stays constant everywhere and we DON'T leave a dark donut hole
-    //       around the original 4 anchor particles.
-    // The earlier "central blob" bug was caused by a non-zero targetCount
-    // *floor* (180 particles dumped into a tiny radius before zoom started).
-    // That floor is gone now, so backfilling the centre is safe.
-    const target = targetCount(viewRadius);
-    const need = Math.min(SPAWN_PER_FRAME, target - parts.length);
-    const ringInner = viewRadius * 0.62;
-    const ringOuter = viewRadius * 1.15;
-    const fillOuter = viewRadius * 0.95;
-    for (let i = 0; i < need; i++) {
-      let r;
-      if (Math.random() < 0.60) {
-        // outer ring — uniform area inside the annulus
-        r = Math.sqrt(ringInner*ringInner + Math.random() * (ringOuter*ringOuter - ringInner*ringInner));
-      } else {
-        // uniform across the whole visible disk (sqrt = constant area density).
-        // Skip the tiny inner core so the 4 anchor particles stay distinct.
-        const minR = 0.6; // model units
-        r = Math.sqrt(minR*minR + Math.random() * (fillOuter*fillOuter - minR*minR));
-      }
-      const a = Math.random() * Math.PI * 2;
-      const x = Math.cos(a) * r, y = Math.sin(a) * r;
-      // Find one or two parents: sample candidates from the last 120 particles
-      // and pick the closest in MODEL space.  Two edges per node gives a denser
-      // web without going N^2 expensive.
-      let parent = -1, parent2 = -1;
-      if (parts.length > 8) {
-        const windowSize = Math.min(120, parts.length);
-        const baseIdx = parts.length - windowSize;
-        let bestD = Infinity, bestIdx = -1;
-        let best2D = Infinity, best2Idx = -1;
-        for (let k = 0; k < 8; k++) {
-          const idx = baseIdx + (Math.random() * windowSize | 0);
-          const q = parts[idx];
-          const dx = q.x - x, dy = q.y - y;
-          const d = dx*dx + dy*dy;
-          if (d < bestD) { best2D = bestD; best2Idx = bestIdx; bestD = d; bestIdx = idx; }
-          else if (d < best2D) { best2D = d; best2Idx = idx; }
-        }
-        const maxConnect = viewRadius * 0.22;
-        const m2 = maxConnect * maxConnect;
-        if (bestD < m2) parent = bestIdx;
-        // ~50% of nodes get a second connection
-        if (best2D < m2 && Math.random() < 0.55) parent2 = best2Idx;
-      }
-      // ~2% of spawns are "important" hub nodes — bigger, brighter, warm color.
-      // These represent the bigger weights / important neurons in the model.
-      const hub = (Math.random() < 0.022);
-      parts.push({ x, y, hue: Math.random(), anchor: false, hub,
-                   born: elapsed, parent, parent2,
-                   pulseSeed: Math.random() * Math.PI * 2 });
-    }
-
-    ctx.clearRect(0, 0, W, H);
-    const grd = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W, H) * 0.7);
-    grd.addColorStop(0, 'rgba(91,233,185,0.07)');
-    grd.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-
-    const invVR = 1 / viewRadius;
-
-    // --- pass 1: connecting lines ---
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.lineWidth = 0.7;
-    ctx.strokeStyle = 'rgba(91,233,185,0.20)';
-    ctx.beginPath();
-    for (let i = 0; i < parts.length; i++) {
-      const p = parts[i];
-      const px = W/2 + p.x * invVR * PX_PER_VR;
-      const py = H/2 + p.y * invVR * PX_PER_VR;
-      // primary edge
-      if (p.parent >= 0) {
-        const q = parts[p.parent];
-        const qx = W/2 + q.x * invVR * PX_PER_VR;
-        const qy = H/2 + q.y * invVR * PX_PER_VR;
-        if (!((px < -8 && qx < -8) || (px > W + 8 && qx > W + 8) ||
-              (py < -8 && qy < -8) || (py > H + 8 && qy > H + 8))) {
-          ctx.moveTo(px, py); ctx.lineTo(qx, qy);
-        }
-      }
-      // secondary edge
-      if (p.parent2 >= 0) {
-        const q = parts[p.parent2];
-        const qx = W/2 + q.x * invVR * PX_PER_VR;
-        const qy = H/2 + q.y * invVR * PX_PER_VR;
-        if (!((px < -8 && qx < -8) || (px > W + 8 && qx > W + 8) ||
-              (py < -8 && qy < -8) || (py > H + 8 && qy > H + 8))) {
-          ctx.moveTo(px, py); ctx.lineTo(qx, qy);
-        }
-      }
-    }
-    ctx.stroke();
-
-    // --- pass 2: particle dots ---
-    for (let i = 0; i < parts.length; i++) {
-      const p = parts[i];
-      const px = W/2 + p.x * invVR * PX_PER_VR;
-      const py = H/2 + p.y * invVR * PX_PER_VR;
-      if (px < -6 || px > W + 6 || py < -6 || py > H + 6) continue;
-
-      const age = elapsed - p.born;
-      const fade = Math.min(1, age / 500);
-
-      if (p.anchor) {
-        const r = Math.max(1.4, 14 / Math.sqrt(viewRadius));
-        ctx.fillStyle = `rgba(242,182,90,${fade.toFixed(2)})`;
-        ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
-      } else if (p.hub) {
-        // Important node: ~2.4x bigger, warm amber, gentle pulse + glow halo.
-        const baseR = Math.max(1.6, 4.2 / Math.pow(viewRadius, 0.18));
-        const pulse = 1 + 0.18 * Math.sin(elapsed * 0.004 + p.pulseSeed);
-        const r = baseR * pulse;
-        const a = Math.min(1, fade * 0.9);
-        // halo
-        const halo = ctx.createRadialGradient(px, py, 0, px, py, r * 3.2);
-        halo.addColorStop(0, `rgba(242,182,90,${(0.45 * a).toFixed(2)})`);
-        halo.addColorStop(1, 'rgba(242,182,90,0)');
-        ctx.fillStyle = halo;
-        ctx.beginPath(); ctx.arc(px, py, r * 3.2, 0, Math.PI * 2); ctx.fill();
-        // core
-        ctx.fillStyle = `rgba(255,210,140,${a.toFixed(2)})`;
-        ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
-      } else {
-        const r = Math.max(0.8, 2.2 / Math.pow(viewRadius, 0.18));
-        const alpha = (0.45 + 0.30 * (1 - tZoom)) * fade;
-        ctx.fillStyle = (p.hue < 0.5 ? 'rgba(120,245,200,' : 'rgba(150,225,240,') + alpha.toFixed(2) + ')';
-        ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-    ctx.globalCompositeOperation = 'source-over';
-
-    let cur = labels[0];
-    for (const l of labels) if (tZoom >= l.t) cur = l;
-    const cap = document.getElementById('zoom-caption');
-    if (cap) cap.textContent = cur.txt;
-    ZOOM_CAPTION_NOW = cur.txt;
-
-    if (elapsed < TOTAL_DURATION) ZOOM_ANIM = requestAnimationFrame(frame);
-    else {
-      ZOOM_ANIM = null;
-      // Snapshot the final frame to an offscreen canvas (synchronous — no
-      // image-decode race) so future visits skip the animation.
-      try {
-        const off = document.createElement('canvas');
-        off.width = canvas.width;
-        off.height = canvas.height;
-        off.getContext('2d').drawImage(canvas, 0, 0);
-        ZOOM_CACHE = { canvas: off, caption: cur.txt };
-      } catch (_) { /* canvas tainted — give up silently */ }
-    }
+    const worldScale = Math.exp(lsAt(elapsed));
+    zoomScene(ctx, W, H, TARGET_R, worldScale, elapsed);
+    if (elapsed < TOTAL) ZOOM_ANIM = requestAnimationFrame(frame);
+    else ZOOM_ANIM = null;   // rest on the final frame
   }
   ZOOM_ANIM = requestAnimationFrame(frame);
 }
+
 function stopZoomOut() {
   if (ZOOM_ANIM) { cancelAnimationFrame(ZOOM_ANIM); ZOOM_ANIM = null; }
-  // If we made it past the visible zoom (~11s) and haven't already cached,
-  // snapshot the canvas now so revisits skip re-animating.
-  if (!ZOOM_CACHE && ZOOM_START && (performance.now() - ZOOM_START) >= ZOOM_CACHE_AFTER_MS) {
-    const canvas = document.getElementById('zoom-canvas');
-    if (canvas && canvas.width > 0 && canvas.height > 0) {
-      try {
-        const off = document.createElement('canvas');
-        off.width = canvas.width;
-        off.height = canvas.height;
-        off.getContext('2d').drawImage(canvas, 0, 0);
-        ZOOM_CACHE = { canvas: off, caption: ZOOM_CAPTION_NOW || '' };
-      } catch (_) { /* ignore */ }
-    }
-  }
 }
 
 function renderZoomStatic() {
@@ -1097,28 +1209,13 @@ function renderZoomStatic() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const W = canvas.clientWidth;
-  const H = canvas.clientHeight;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, W, H);
-  const gradient = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.65);
-  gradient.addColorStop(0, 'rgba(91,233,185,0.09)');
-  gradient.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, W, H);
-  for (let i = 0; i < 1400; i++) {
-    const x = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1 * W;
-    const y = (Math.sin(i * 78.233) * 12345.6789 % 1 + 1) % 1 * H;
-    const hub = i % 53 === 0;
-    ctx.fillStyle = hub ? 'rgba(242,182,90,0.85)' : 'rgba(122,217,229,0.55)';
-    ctx.beginPath();
-    ctx.arc(x, y, hub ? 2.2 : 1, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  const caption = document.getElementById('zoom-caption');
-  if (caption) caption.textContent = 'Llama 4 Behemoth: ~2T total · ~288B active per token (MoE)';
+  const TARGET_R = Math.min(W, H) * 0.40;
+  const last = ZOOM_MODELS.length - 1;
+  const worldScale = TARGET_R / ZOOM_MODELS[last].params;   // final model fills the view
+  zoomScene(ctx, W, H, TARGET_R, worldScale, 0);   // caption set inside zoomScene
 }
 
 // ============================================================
@@ -1275,9 +1372,10 @@ function renderEnergy() {
     <div class="stat-row mt-2">
       <div class="stat"><div class="stat-label">Energy / day</div><div class="stat-value phos" id="en-kwh">—</div></div>
       <div class="stat"><div class="stat-label">Equivalent household-days</div><div class="stat-value amber" id="en-homes">—</div></div>
+      <div class="stat"><div class="stat-label">Electric cars fully charged</div><div class="stat-value cyan" id="en-cars">—</div></div>
       <div class="stat"><div class="stat-label">CO₂-equivalent / day (U.S. avg)</div><div class="stat-value rose" id="en-co2">—</div></div>
     </div>
-    <p class="small muted mt-2">Assumptions: 0.3 Wh/query · 30 kWh/U.S. household-day · 0.35 kg CO₂e/kWh. Cooling, networking, idle capacity, training, and non-U.S. grids are excluded.</p>`;
+    <p class="small muted mt-2">Assumptions: 0.3 Wh/query · 30 kWh/U.S. household-day · 70 kWh/EV full charge · 0.35 kg CO₂e/kWh. Cooling, networking, idle capacity, training, and non-U.S. grids are excluded.</p>`;
   computeEnergy();
 }
 function computeEnergy() {
@@ -1286,9 +1384,11 @@ function computeEnergy() {
   document.getElementById('en-val').textContent = m.toLocaleString();
   const kwhPerDay = (m * 1e6) * (ENERGY_DEFAULTS.wattHoursPerQuery / 1000);
   const homes = kwhPerDay / ENERGY_DEFAULTS.householdKwhPerDay;
+  const cars = kwhPerDay / 70;
   const co2 = kwhPerDay * ENERGY_DEFAULTS.kilogramsCo2ePerKwh;
   document.getElementById('en-kwh').textContent  = fmtSI(kwhPerDay) + ' kWh';
   document.getElementById('en-homes').textContent = fmtSI(homes);
+  document.getElementById('en-cars').textContent = fmtSI(cars);
   document.getElementById('en-co2').textContent  = fmtSI(co2) + ' kg';
 }
 function wireEnergy() {
@@ -1470,6 +1570,9 @@ function showAgentLoopStatic() {
 // ============================================================
 let TT_TYPING_ANIM = null;
 let TT_IDE_TIMERS = [];
+// After the demo finishes, wait this long before replaying it so the audience
+// can digest what happened — then loop so latecomers can watch it again.
+const TOOL_TYPING_LOOP_DELAY = 10000;
 
 // Files the IDE pane can show.  Each line is an array of [class, text] tokens
 // so we can do simple syntax highlighting without a real parser.
@@ -1653,7 +1756,16 @@ function startToolTypingAnim() {
   pre.innerHTML = '';
   let i = 0;
   function tick() {
-    if (i >= chunks.length) { TT_TYPING_ANIM = null; return; }
+    if (i >= chunks.length) {
+      // Loop the demo: pause so the audience can digest, then replay from the
+      // top. Reuse TT_TYPING_ANIM so stopToolTypingAnim() cancels a pending
+      // replay when the slide is left or animations are paused.
+      TT_TYPING_ANIM = setTimeout(() => {
+        if (PRESENTATION_ANIMATIONS_PAUSED) { TT_TYPING_ANIM = null; return; }
+        startToolTypingAnim();
+      }, TOOL_TYPING_LOOP_DELAY);
+      return;
+    }
     const chunk = chunks[i];
     pre.innerHTML += chunk;
     i++;

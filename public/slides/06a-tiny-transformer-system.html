@@ -1,15 +1,37 @@
 <section class="tiny-system-slide">
-  <h2>Meet our entire tiny transformer</h2>
-  <p class="small muted" style="margin-top:-0.4em;">Training learned every vector and matrix shown here. During the walkthrough they stay <strong>frozen</strong>; only the input and the calculations change.</p>
+  <h2>So what's inside a transformer model?</h2>
+  <p class="small muted" style="margin-top:-0.4em;">Lots of numbers, vectors, and matrices whose values were decided and frozen during training, which work together to make predictions based on the training data.</p>
 
   <div class="tiny-system-grid mt-1">
+    <div class="tiny-system-middle">
+      <div class="tiny-system-panel training-panel">
+        <h3>1 · What it learned</h3>
+        <p class="tiny-system-copy">Just two patterns:</p>
+        <div class="training-examples">
+          <div><span>C</span><span>A</span><b>→</b><span>T</span></div>
+          <div><span>B</span><span>A</span><b>→</b><span>D</span></div>
+        </div>
+        <p class="tiny-system-foot">A real model will be trained on billions/trillions of words.</p>
+      </div>
+
+      <div class="tiny-system-panel position-panel">
+        <h3>2 · Where each letter sits</h3>
+        <p class="tiny-system-copy">A second small list marks whether a letter came first or second.</p>
+        <div class="position-cards">
+          <div><span>position 1</span><code>[−0.22, 0.57]</code></div>
+          <div><span>position 2</span><code>[−0.53, −0.15]</code></div>
+        </div>
+        <div class="position-example"><code>letter</code> + <code>position</code> = <strong>what goes into the model</strong></div>
+      </div>
+    </div>
+
     <div class="tiny-system-panel embedding-panel">
-      <h3>1 · Five-token vocabulary</h3>
-      <p class="tiny-system-copy">A token is an ID that selects one fixed row from this learned lookup table.</p>
+      <h3>3 · A tiny vocabulary</h3>
+      <p class="tiny-system-copy">The model knows only five letters. Each one is stored as a short <strong>list of numbers</strong> it learned — a "word-vector."</p>
       <div class="token-vector-table" role="table" aria-label="The five learned token vectors">
         <div class="token-vector-header" role="row">
-          <span role="columnheader">token</span>
-          <span role="columnheader">learned 2D vector</span>
+          <span role="columnheader">letter</span>
+          <span role="columnheader">learned list of numbers</span>
         </div>
         <div class="token-vector-row cyan" role="row"><strong role="cell">C</strong><code role="cell">[ 0.07, −1.14 ]</code></div>
         <div class="token-vector-row violet" role="row"><strong role="cell">B</strong><code role="cell">[ 0.54, −1.00 ]</code></div>
@@ -17,56 +39,30 @@
         <div class="token-vector-row amber" role="row"><strong role="cell">T</strong><code role="cell">[−1.62, −1.70 ]</code></div>
         <div class="token-vector-row rose" role="row"><strong role="cell">D</strong><code role="cell">[−1.15,  2.91 ]</code></div>
       </div>
-      <p class="tiny-system-foot">The coordinates are not hand-written meanings. Gradient descent found positions useful for these two examples.</p>
-    </div>
-
-    <div class="tiny-system-middle">
-      <div class="tiny-system-panel position-panel">
-        <h3>2 · Two positions</h3>
-        <p class="tiny-system-copy">The token vector stays the same. A position vector says where it appeared.</p>
-        <div class="position-cards">
-          <div><span>position 1</span><code>[−0.22, 0.57]</code></div>
-          <div><span>position 2</span><code>[−0.53, −0.15]</code></div>
-        </div>
-        <div class="position-example"><code>token</code> + <code>position</code> = <strong>input vector</strong></div>
-      </div>
-
-      <div class="tiny-system-panel training-panel">
-        <h3>3 · Training set</h3>
-        <div class="training-examples">
-          <div><span>C</span><span>A</span><b>→</b><span>T</span></div>
-          <div><span>B</span><span>A</span><b>→</b><span>D</span></div>
-        </div>
-        <p class="tiny-system-foot">This model memorizes two relationships. It is a real transformer, but not a useful language model.</p>
-      </div>
+      <p class="tiny-system-foot">The numbers aren't hand-written meanings — training just found values that work.</p>
     </div>
 
     <div class="tiny-system-panel architecture-panel">
-      <h3>4 · Transformer block</h3>
-      <div class="tiny-architecture">
-        <div><strong>2D input vectors</strong><span>two tokens × two numbers</span></div>
-        <b>↓</b>
-        <div><strong>RMSNorm</strong><span>2 learned scale values</span></div>
-        <b>↓</b>
-        <div class="qkv-box">
-          <strong>Q · K · V</strong>
-          <span><em>query</em> asks · <em>key</em> matches · <em>value</em> carries</span>
-          <small>three learned 2×2 projections</small>
+      <h3>4 · Other Math Inside</h3>
+      <div class="tiny-inside">
+        <div class="ti-item">
+          <span class="ti-num">A</span>
+          <div><strong>Attention</strong><span>Lets the latest letter <em>look back</em> at earlier ones and pull in the context that matters. This is the one genuinely new part.</span></div>
         </div>
-        <b>↓</b>
-        <div><strong>One attention head</strong><span>causal: choose earlier context</span></div>
-        <b>↓</b>
-        <div><strong>O projection + residual</strong><span>one learned 2×2 context update</span></div>
-        <b>↓</b>
-        <div><strong>RMSNorm + tiny MLP</strong><span>2 scales + two learned 2×2 matrices</span></div>
-        <b>↓</b>
-        <div><strong>Score five tokens</strong><span>reuse the token vectors; no new weights</span></div>
+        <div class="ti-item">
+          <span class="ti-num">×</span>
+          <div><strong>Weighted mixing</strong><span>A few matrix multiplies — the same "blend the numbers" step from Travis, repeated.</span></div>
+        </div>
+        <div class="ti-item">
+          <span class="ti-num">+</span>
+          <div><strong>A little housekeeping</strong><span>Small steps that keep the numbers stable and sharpen the final guess.</span></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="tiny-system-callout">
-    <strong>42 frozen values:</strong> 10 token · 4 position · 4 normalization · 16 attention (Q/K/V/O) · 8 MLP
-    <span>During prediction, the model only looks them up and runs the arithmetic.</span>
+    <strong>About 42 learned numbers in total</strong>
+    <span>that is the entire model — during prediction it only looks them up and runs the arithmetic</span>
   </div>
 </section>

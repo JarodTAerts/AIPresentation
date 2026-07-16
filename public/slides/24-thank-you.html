@@ -1,9 +1,38 @@
-<section class="title-slide" data-background-color="#06080F">
+<section class="title-slide thanks-slide" data-background-color="#06080F">
   <div class="matrix-bg" aria-hidden="true"></div>
 
-  <h1>
-    <span class="good">Thank you.</span>
-  </h1>
-  <div class="subtitle">Questions, pushback, and "wait, is that real?" all welcome.</div>
-  <div class="presenter">— Jarod Aerts —</div>
+  <div class="thanks-grid">
+    <div class="thanks-left">
+      <h1><span class="good">Thank you.</span></h1>
+      <div class="presenter">— Jarod Aerts —</div>
+    </div>
+    <div class="thanks-right">
+      <img src="images/thoughts-agree.jpg" alt="Thoughts? Agree?">
+    </div>
+  </div>
+
+  <style>
+    .thanks-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: center;
+      gap: 2.4em;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+    .thanks-left { text-align: left; }
+    .thanks-left h1 { margin-bottom: 0.5em; }
+    .thanks-slide .thanks-left .presenter { text-align: left; }
+    .thanks-right { display: flex; align-items: center; justify-content: center; }
+    .thanks-right img {
+      width: 100%;
+      height: 520px;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.55);
+    }
+  </style>
 </section>

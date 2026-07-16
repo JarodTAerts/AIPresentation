@@ -6,52 +6,51 @@
 
 **Runtime:** Approximately 30–40 minutes plus discussion
 
-**Source of truth:** `public/js/slide-manifest.js` (30 slides)
+**Source of truth:** `public/js/slide-manifest.js` (32 slides)
 
 ## I. The math underneath
 
 1. Title
 2. Current adoption and investment
 3. Presentation map
-4. Linear algebra 101
-5. Matrix multiplication walkthrough
-6. Interactive mood mixer
-7. Meet the complete 42-parameter transformer
-8. Walk through `CA → T` and `BA → D`
-9. Scale from 42 parameters to frontier models
-10. Pretraining and post-training
+4. Section divider
+5. Linear algebra 101
+6. Matrix multiplication walkthrough
+7. Interactive mood mixer
+8. Meet the complete 42-parameter transformer
+9. Walk through `CA → T` and `BA → D`
+10. Scale from 42 parameters to frontier models
+11. Pretraining and post-training
 
 ## II. What is inside a modern AI assistant
 
-11. Section divider
-12. Product architecture: model, retrieval, tools, safety, and telemetry
-13. Agent loop: think, act, observe, repeat
+12. Section divider
+13. Product architecture: model, retrieval, tools, safety, and telemetry
+14. Component close-up: system prompt, safety filters, code sandbox, sub-models
+15. Agent loop: think, act, observe, repeat
+16. MCP: a shared protocol for tools and data
+17. Agent Skills: reusable procedures without retraining
 
 ## III. AI and code
 
-14. Section divider
-15. Why code moved first
-16. Three generations of coding tools
-17. Animated coding-agent workflow
+18. Section divider
+19. Why code moved first
+20. Three generations of coding tools
+21. Animated coding-agent workflow
+22. Software Brain: how AI code can change everything
 
-## IV. The new plumbing
+## IV. Impact and costs
 
-18. MCP: a shared protocol for tools and data
-19. Agent Skills: reusable procedures without retraining
-
-## V. Impact and costs
-
-20. Section divider
-21. Early-career employment evidence
-22. Company cuts, reversals, and implementation costs
-23. A scenario for cheaper custom software
-24. Query energy and grid effects
-25. Capital concentration
-26. Memory shortages and consumer-device prices
-27. Generative art and creative labor
-28. Moral, legal, and governance questions
-29. Takeaways
-30. Thank you
+23. Section divider
+24. Early-career employment evidence
+25. Company cuts, reversals, and implementation costs
+26. Query energy and grid effects
+27. Capital concentration
+28. Memory shortages and consumer-device prices
+29. Generative art and creative labor
+30. Moral, legal, and governance questions
+31. Takeaways
+32. Thank you
 
 ## Evidence conventions
 
