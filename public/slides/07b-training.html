@@ -129,7 +129,7 @@
       <div class="ts-body">
         Combine and filter public, licensed, human-created, and synthetic data. Llama 3 disclosed about <strong>15 trillion tokens</strong> — subword chunks, not words.
       </div>
-      <div class="ts-stat">dedupe · filter · tokenize</div>
+      <div class="ts-stat">gather · clean · chunk into tokens</div>
     </div>
 
     <div class="train-step ts-cyan">
@@ -139,7 +139,7 @@
         Give the model all earlier tokens and ask for the next one. It cannot look ahead.
         <div class="nt-example">"The cat sat on the" → predict <span class="guess">" mat"</span></div>
       </div>
-      <div class="ts-stat">causal next-token objective</div>
+      <div class="ts-stat">just: guess the next word</div>
     </div>
 
     <div class="train-step ts-amber">
@@ -148,7 +148,7 @@
       <div class="ts-body">
         Backpropagation assigns credit for the error; an optimizer nudges many weights toward a less-wrong prediction. Repeat across enormous batches.
       </div>
-      <div class="ts-stat">loss → gradients → optimizer</div>
+      <div class="ts-stat">measure the error · nudge the weights</div>
     </div>
 
     <div class="train-step ts-violet">
@@ -157,7 +157,7 @@
       <div class="ts-body">
         Demonstrations teach instruction-following. Preference data, model feedback, and verifiable rewards shape helpfulness, safety, and reasoning.
       </div>
-      <div class="ts-stat">SFT · preference/RL training</div>
+      <div class="ts-stat">coach it to be helpful &amp; safe</div>
     </div>
   </div>
 

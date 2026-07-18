@@ -26,9 +26,9 @@ window.CLAIM_DATA = {
   },
   earlyCareerEmployment: {
     labels: ['Early career · 22–25', 'Experienced workers'],
-    values: [-16, 0],
+    values: [-13, 0],
     unit: '% relative employment change after firm-level controls',
-    asOf: '2022–2025; Nov 2025 working-paper revision',
+    asOf: '2022–2025; Nov 2025 working-paper revision (headline ~13%, up to ~16% for the most exposed)',
     source: 'https://digitaleconomy.stanford.edu/app/uploads/2025/11/CanariesintheCoalMine_Nov25.pdf',
   },
   energy: {
@@ -54,7 +54,7 @@ window.CLAIM_DATA = {
     },
     {
       id: 'capex',
-      label: '2026 hyperscaler guidance',
+      label: '2026 Hyperscaler Capex',
       usd: 7.0e11,
       kind: 'One year of total capex',
       asOf: 'Guidance through Q1 2026',
@@ -72,9 +72,10 @@ window.CLAIM_DATA = {
       id: 'aiprofit',
       label: 'AI-lab profit · OpenAI, Anthropic & peers',
       usd: 0,
+      displayValue: '−$21B',
       kind: 'Combined annual net profit',
       asOf: 'Full-year 2025',
-      desc: 'Essentially zero — in fact deeply negative. OpenAI made ~$13B in 2025 but lost ~$21B on operations; peers also run at a loss. These valuations price in future profits, not today\'s.',
+      desc: 'Deeply negative. OpenAI took in ~$13B of revenue in 2025 but lost ~$21B on operations; peers also run at a loss. These valuations price in future profits, not today\'s.',
     },
   ],
 };

@@ -314,15 +314,15 @@ function wireMatmul() {
 //  Slide 5 — Mood Mixer: 3 sliders × 3×3 matrix → 3 outputs
 // ============================================================
 const MOOD_DEFAULTS = {
-  inputs: [8, 3, 6],
+  inputs: [4, 7, 2],
   weights: [
-    [ 0.8,  0.1, -0.2],
-    [ 0.1,  0.9,  0.0],
-    [-0.1,  0.0,  0.7],
+    [ 0.5,  0.2, -0.1],
+    [ 0.1,  0.8,  0.1],
+    [-0.2,  0.0,  0.9],
   ],
 };
 const MOOD_LABELS_IN  = ['Hunger', 'Tired', 'Mood'];
-const MOOD_LABELS_OUT = ['Eat?', 'Sleep?', 'Socialize?'];
+const MOOD_LABELS_OUT = ['Eat?', 'Sleep?', 'Chat?'];
 
 function renderMoodMixer() {
   const root = document.getElementById('mood-mixer');
@@ -421,7 +421,7 @@ function computeMood() {
   // Live verdict — name the action Travis is most likely to take next
   const verdict = document.getElementById('mm-verdict');
   if (verdict) {
-    const ACTIONS = ['eat something', 'go to sleep', 'go socialize'];
+    const ACTIONS = ['eat something', 'go to sleep', 'go chat with a neighbor'];
     if (outs[bestIdx] <= 0) {
       verdict.innerHTML = `Travis doesn't feel like doing anything right now.`;
     } else {
@@ -1415,7 +1415,7 @@ function renderWealth() {
       ${WEALTH_ITEMS.map((it, i) => `
         <button class="w-pill ${i === 0 ? 'is-active' : ''}" type="button" data-id="${it.id}">
           <span class="w-pill-label">${it.label}</span>
-          <span class="w-pill-value">$${fmtUSD(it.usd)}</span>
+          <span class="w-pill-value">${it.displayValue || '$' + fmtUSD(it.usd)}</span>
         </button>`).join('')}
     </div>
     <div class="stat-row mt-2">
@@ -1431,7 +1431,7 @@ function computeWealth() {
   const root = document.getElementById('wealth-widget'); if (!root) return;
   const pick = WEALTH_STATE.pick;
   const it = WEALTH_ITEMS.find(x => x.id === pick); if (!it) return;
-  document.getElementById('w-val').textContent = '$' + fmtUSD(it.usd);
+  document.getElementById('w-val').textContent = it.displayValue || ('$' + fmtUSD(it.usd));
   document.getElementById('w-kind').textContent = it.kind;
   document.getElementById('w-desc').textContent = `${it.desc} · As of: ${it.asOf}.`;
   // sync active pill
@@ -1507,7 +1507,7 @@ function safe(name, fn) {
 let AL_CYCLE = null, AL_LOG_TIMER = null;
 const AGENT_LOOP_LINES = [
   { cls: 'l-think', txt: '[think] User wants last quarter\'s revenue trend.' },
-  { cls: 'l-act',   txt: '[act ] call get_financials(quarter="Q1 2026")' },
+  { cls: 'l-act',   txt: '[act ] call get_financials(quarter="Q2 2026")' },
   { cls: 'l-obs',   txt: '[obs ] → $4.2B revenue, +12% YoY' },
   { cls: 'l-think', txt: '[think] Need a comparison chart.' },
   { cls: 'l-act',   txt: '[act ] call render_chart(data=…, type="line")' },

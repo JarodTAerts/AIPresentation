@@ -10,8 +10,8 @@
 <span class="ai">🤖 I'll add a health check endpoint. Let me look at your routes first.</span>
 <span class="tool" data-act="open:routes">  → read_file("src/routes.ts")</span>
 <span class="tool-out">    found 4 existing routes</span>
-<span class="tool" data-act="edit:routes">  → edit_file("src/routes.ts")  +8 lines</span>
-<span class="tool" data-act="create:test">  → create_file("test/health.test.ts")  +24 lines</span>
+<span class="tool" data-act="edit:routes">  → edit_file("src/routes.ts")  +7 lines</span>
+<span class="tool" data-act="create:test">  → create_file("test/health.test.ts")  +19 lines</span>
 <span class="tool" data-act="run:tests">  → bash("npm test")</span>
 <span class="tool-out">    PASS  test/health.test.ts (3 tests)</span>
 <span class="tool-out">    PASS  test/routes.test.ts  (12 tests)</span>
@@ -34,7 +34,7 @@
   </div>
 
   <div class="callout cyan mt-2">
-    Notice the loop: <strong>read → think → edit → run tests → check results</strong>. Three years ago this was a research demo. Today it's available in the terminal for $20/month.
+    Notice the loop: <strong>read → think → edit → run tests → check results</strong>. This is an illustrative example — three years ago it was a research demo; today it runs in mainstream terminal coding agents.
   </div>
 
   <style>

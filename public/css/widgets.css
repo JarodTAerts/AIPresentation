@@ -1746,13 +1746,14 @@
 }
 .position-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.4em;
 }
 .position-cards > div {
   display: grid;
   gap: 0.1em;
-  padding: 0.3em 0.4em;
+  min-width: 0;
+  padding: 0.3em 0.3em;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--bg-0);
@@ -1765,7 +1766,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.position-cards code { color: var(--phosphor); font-size: 0.58em; white-space: nowrap; }
+.position-cards code { color: var(--phosphor); font-size: 0.5em; letter-spacing: -0.01em; white-space: nowrap; }
 .position-example {
   margin-top: 0.45em;
   color: var(--ink-soft);

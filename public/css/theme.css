@@ -201,6 +201,18 @@ html, body { background: var(--bg-1); color: var(--ink); }
 .eyebrow.rose   { color: var(--rose); background: rgba(240,138,138,0.08); border-color: rgba(240,138,138,0.2); }
 .eyebrow.violet { color: var(--violet); background: rgba(181,151,240,0.08); border-color: rgba(181,151,240,0.2); }
 
+/* Inline text-color utilities (heading accents, inline emphasis). */
+.reveal .c-phos   { color: var(--phosphor); }
+.reveal .c-cyan   { color: var(--cyan); }
+.reveal .c-amber  { color: var(--amber); }
+.reveal .c-rose   { color: var(--rose); }
+.reveal .c-violet { color: var(--violet); }
+/* TOC rows keep neutral text; the left border carries the section accent. */
+.reveal .toc-list li.c-cyan,
+.reveal .toc-list li.c-amber,
+.reveal .toc-list li.c-rose,
+.reveal .toc-list li.c-violet { color: var(--ink); }
+
 .interactive-badge {
   display: inline-block;
   font-family: var(--mono);
@@ -330,6 +342,7 @@ html, body { background: var(--bg-1); color: var(--ink); }
   padding: 1.05em 1.1em;
 }
 .hook-cards .card .card-num { font-size: 2.6em; margin-bottom: 0.25em; }
+.hook-cards .card .card-num.compact { font-size: 2.05em; letter-spacing: -0.02em; }
 .hook-cards .card-num {
   display: flex;
   align-items: baseline;
@@ -551,6 +564,7 @@ html, body { background: var(--bg-1); color: var(--ink); }
 .callout.amber { border-left-color: var(--amber); }
 .callout.rose  { border-left-color: var(--rose); }
 .callout.cyan  { border-left-color: var(--cyan); }
+.callout.violet { border-left-color: var(--violet); }
 .callout strong { color: var(--ink); }
 
 .pull-quote {

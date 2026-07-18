@@ -31,7 +31,7 @@
 16. MCP: a shared protocol for tools and data
 17. Agent Skills: reusable procedures without retraining
 
-## III. AI and code
+## III. AI & Code
 
 18. Section divider
 19. Why code moved first
