@@ -339,10 +339,10 @@
     let watchUrl  = null;
 
     if (VIDEO_CONFIG.videoId) {
-      embedSrc = `https://www.youtube.com/embed/${VIDEO_CONFIG.videoId}?${VIDEO_CONFIG.params || ''}`;
+      embedSrc = `https://www.youtube.com/embed/${VIDEO_CONFIG.videoId}?${embedParams()}`;
       watchUrl = `https://www.youtube.com/watch?v=${VIDEO_CONFIG.videoId}`;
     } else if (VIDEO_CONFIG.channel) {
-      embedSrc = `https://www.youtube.com/embed/live_stream?channel=${VIDEO_CONFIG.channel}&${VIDEO_CONFIG.params || ''}`;
+      embedSrc = `https://www.youtube.com/embed/live_stream?channel=${VIDEO_CONFIG.channel}&${embedParams()}`;
       watchUrl = `https://www.youtube.com/channel/${VIDEO_CONFIG.channel}/live`;
     }
 
@@ -352,10 +352,21 @@
       iframe.src = embedSrc;
       iframe.title = 'YouTube video player';
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      // Match YouTube's own embed: send the origin so the player can validate
+      // embedding permission. Without this some contexts throw "Error 153".
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       iframe.allowFullscreen = true;
       frame.appendChild(iframe);
       ytLink.href = watchUrl;
       ytLink.hidden = false;
+    }
+
+    function embedParams() {
+      const base = VIDEO_CONFIG.params || '';
+      // Passing the embedding origin helps the player validate the host and
+      // avoids the generic "Video player configuration error" (Error 153).
+      const origin = `origin=${encodeURIComponent(location.origin)}`;
+      return base ? `${base}&${origin}` : origin;
     }
   })();
 
